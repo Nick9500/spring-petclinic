@@ -29,7 +29,15 @@ You could start a MySql database with docker:
 ```
 docker run -e MYSQL_ROOT_PASSWORD=petclinic -e MYSQL_DATABASE=petclinic -p 3306:3306 mysql:5.7.8
 ```
+## Eric's commands
 
+```
+docker run -e MYSQL_ROOT_PASSWORD=petclinic -e MYSQL_DATABASE=petclinic -p 3306:3306 -d -it mysql:5.7.8
+```
+
+```
+docker exec -it <Container Id> bash
+```
 ## Working with Petclinic in Eclipse/STS
 
 ### prerequisites
