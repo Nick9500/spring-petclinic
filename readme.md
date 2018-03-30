@@ -38,6 +38,11 @@ ssh
 ```
 docker exec -it <Container Id> bash
 ```
+Access mysql
+```
+mysql --user=root --password=petclinic
+```
+
 ## Working with Petclinic in Eclipse/STS
 
 ### prerequisites
