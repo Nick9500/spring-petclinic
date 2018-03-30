@@ -43,6 +43,8 @@ Access mysql
 mysql --user=root --password=petclinic
 ```
 
+by default, mysql writes files into var/lib/mysql
+
 ## Working with Petclinic in Eclipse/STS
 
 ### prerequisites
