@@ -38,6 +38,12 @@ if you run into problems, do this to remove volumes and then restart
 ```
 docker-compose rm -v 
 ```
+
+To access mongodb
+
+```
+docker exec -it <Container Id> mongo
+```
 ## Eric's commands to access MYSQL through CLI
 
 ```
