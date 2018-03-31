@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.mongoSampleIntegration;
+package org.springframework.samples.petclinic.dataMigration.mongoSampleIntegration;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

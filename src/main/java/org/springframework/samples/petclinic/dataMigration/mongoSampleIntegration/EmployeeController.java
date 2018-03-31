@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.mongoSampleIntegration;
+package org.springframework.samples.petclinic.dataMigration.mongoSampleIntegration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
