@@ -6,8 +6,6 @@ mysql:
   environment:
     - MYSQL_ROOT_PASSWORD=petclinic
     - MYSQL_DATABASE=petclinic
-  volumes:
-    - "./conf.d:/etc/mysql/conf.d:ro"
 
 mongo:
   image: mongo
@@ -19,6 +17,4 @@ mongo:
     - MONGO_PASS=root
   ports:
     - 27017:27017
-  volumes:
-    - "./data/db:/data/db"
 
