@@ -29,7 +29,16 @@ You could start a MySql database with docker:
 ```
 docker run -e MYSQL_ROOT_PASSWORD=petclinic -e MYSQL_DATABASE=petclinic -p 3306:3306 mysql:5.7.8
 ```
-## Eric's commands to access DB through CLI
+
+## Eric's to start up Dbs
+```
+docker-compose up
+```
+if you run into problems, do this to remove volumes and then restart
+```
+docker-compose rm -v 
+```
+## Eric's commands to access MYSQL through CLI
 
 ```
 docker run -e MYSQL_ROOT_PASSWORD=petclinic -e MYSQL_DATABASE=petclinic -p 3306:3306 -d -it mysql:5.7.8
