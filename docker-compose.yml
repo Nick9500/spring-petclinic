@@ -1,9 +1,24 @@
 mysql:
   image: mysql
+  container_name: "mysql-petclinic"
   ports:
     - "3306:3306"
   environment:
-    - MYSQL_ROOT_PASSWORD=root
-    - MYSQL_DATABASE=test
+    - MYSQL_ROOT_PASSWORD=petclinic
+    - MYSQL_DATABASE=petclinic
   volumes:
     - "./conf.d:/etc/mysql/conf.d:ro"
+
+mongo:
+  image: mongo
+  container_name: "mongodb-petclinic"
+  environment:
+    - MONGO_DATA_DIR=/data/db
+    - MONGO_LOG_DIR=/dev/null
+    - MONGO_USER=root
+    - MONGO_PASS=root
+  ports:
+    - 27017:27017
+  volumes:
+    - "./data/db:/data/db"
+
