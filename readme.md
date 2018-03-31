@@ -30,7 +30,7 @@ You could start a MySql database with docker:
 docker run -e MYSQL_ROOT_PASSWORD=petclinic -e MYSQL_DATABASE=petclinic -p 3306:3306 mysql:5.7.8
 ```
 
-## Eric's to start up Dbs
+## Eric's to start up MYSQL and MongoDB
 ```
 docker-compose up
 ```
