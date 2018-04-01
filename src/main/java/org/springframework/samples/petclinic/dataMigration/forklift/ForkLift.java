@@ -28,10 +28,17 @@ public class ForkLift {
     VisitMRepository visitMRepository;
 
     public void start(){
-        System.out.println("Start forklifting...");
+        forkLiftOwner();
+        forkLiftVisits();
+    }
+
+    private void forkLiftOwner() {
+        printForkLiftBanners(true,"owners");
+
         ownerMRepository.deleteAll();
-        visitMRepository.deleteAll();
+
         Collection<Owner> forkliftData = ownerRepository.findAll();
+
         for (Owner owner : forkliftData){
 
             //BROKEN AS FK
@@ -40,20 +47,34 @@ public class ForkLift {
             ownerMRepository.save(mowner);
 
         }
+        printForkLiftBanners(false,"owners");
+
+    }
+
+    private void forkLiftVisits() {
+        printForkLiftBanners(true,"visits");
+
+
+        visitMRepository.deleteAll();
 
         Collection<Visit> forkliftedVisitData = visitRepository.findAll();
 
-        for (Visit visit : forkliftedVisitData){
-            MVisit mvisit = new MVisit();
-            mvisit.setDate( visit.getDate() );
-            mvisit.setDescription( visit.getDescription() );
-            mvisit.setPetId( visit.getPetId().toString() );
-            visitMRepository.save( mvisit );
+        for (Visit visit : forkliftedVisitData) {
+            MVisit mvisit = convertVisitToMvisit(visit);
+            System.out.println(mvisit);
+            visitMRepository.save(mvisit);
         }
 
-        System.out.println("Done forklifting");
+        printForkLiftBanners(false,"visits");
+
+
     }
 
+    /**
+     * Converts a owner entity to Mowner
+     * @param owner
+     * @return
+     */
     private MOwner convertOwnerToMOwner(Owner owner){
         MOwner mowner = new MOwner();
         mowner.setId(owner.getId().toString());
@@ -65,5 +86,58 @@ public class ForkLift {
         return mowner;
     }
 
+    /**
+     * Converts a visit entity to Mvisit
+     * @param visit
+     * @return
+     */
+    private MVisit convertVisitToMvisit(Visit visit){
+        MVisit mvisit = new MVisit();
+        mvisit.setDate(visit.getDate());
+        mvisit.setDescription(visit.getDescription());
+        mvisit.setPetId(visit.getPetId().toString());
+        return mvisit;
     }
+
+    /**
+     * Method to prints banners to show that forklifting entity starts/finished
+     * @param start
+     * @param entity
+     */
+    private void printForkLiftBanners(Boolean start, String entity){
+        String a;
+
+        if(start){
+            a = "Start forklifting "+"entity";
+        }else{
+            a = "Finished forklifting "+"entity";
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for(int i = 0; i<a.length(); i++){
+            if(i == 0){
+                stringBuilder.append("+");
+            }else if(i == a.length()-1){
+                stringBuilder.append("+");
+            }else{
+                stringBuilder.append("-");
+            }
+        }
+
+        stringBuilder.append("\n"+a+"\n");
+
+        for(int i = 0; i<a.length(); i++){
+            if(i == 0){
+                stringBuilder.append("+");
+            }else if(i == a.length()-1){
+                stringBuilder.append("+");
+            }else{
+                stringBuilder.append("-");
+            }
+        }
+
+        System.out.println(stringBuilder.toString());
+    }
+
 }
