@@ -25,9 +25,8 @@ public class EmployeeController {
     }
 
     @RequestMapping(value ="/employee", method = RequestMethod.POST)
-    public Employee create(@RequestBody String name){
-        Employee a = new Employee(name);
-        return employeeRepository.save(a);
+    public Employee create(@RequestBody Employee employee){
+        return employeeRepository.save(employee);
     }
 
 //    @RequestMapping(method = RequestMethod.GET)
