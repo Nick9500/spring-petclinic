@@ -2,7 +2,6 @@ package org.springframework.samples.petclinic.dataMigration.mowner;
 
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
-import org.springframework.core.style.ToStringCreator;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.samples.petclinic.dataMigration.model.MPerson;
 
@@ -105,11 +104,12 @@ public class MOwner extends MPerson {
 
     @Override
     public String toString() {
-        return new ToStringCreator(this)
-
-            .append("id", this.getId()).append("new", this.isNew())
-            .append("lastName", this.getLastName())
-            .append("firstName", this.getFirstName()).append("address", this.address)
-            .append("city", this.city).append("telephone", this.telephone).toString();
+        return new StringBuilder()
+            .append("id:"+this.getId())
+            .append("lastName:"+ this.getLastName())
+            .append("firstName:"+this.getFirstName())
+            .append("address:"+this.address)
+            .append("city:"+this.city)
+            .append("telephone:"+this.telephone).toString();
     }
 }
