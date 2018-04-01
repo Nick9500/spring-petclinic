@@ -25,18 +25,24 @@ public class ForkLift {
         for (Owner owner : forkliftData){
 
             //BROKEN AS FK
-            MOwner mowner = new MOwner();
-            mowner.setId(owner.getId().toString());
-            mowner.setFirstName(owner.getFirstName());
-            mowner.setLastName(owner.getLastName());
-            mowner.setAddress(owner.getAddress());
-            mowner.setCity(owner.getCity());
-            mowner.setTelephone(owner.getTelephone());
+            MOwner mowner = convertOwnerToMOwner(owner);
             System.out.println(mowner);
             ownerMRepository.save(mowner);
 
         }
         System.out.println("Done forklifting Owners");
 
+    }
+
+    private MOwner convertOwnerToMOwner(Owner owner){
+        MOwner mowner = new MOwner();
+        mowner.setId(owner.getId().toString());
+        mowner.setFirstName(owner.getFirstName());
+        mowner.setLastName(owner.getLastName());
+        mowner.setAddress(owner.getAddress());
+        mowner.setCity(owner.getCity());
+        mowner.setTelephone(owner.getTelephone());
+
+        return mowner;
     }
 }
