@@ -171,6 +171,7 @@ public class ForkLift {
         MPet mpet = new MPet();
         mpet.setBirthDate(pet.getBirthDate());
         mpet.setType(pet.getType());
+        mpet.setName(pet.getName());
         MOwner mOwner = convertOwnerToMOwner(pet.getOwner());
         mpet.setOwner(mOwner);
         mpet.setId(pet.getId().toString());
