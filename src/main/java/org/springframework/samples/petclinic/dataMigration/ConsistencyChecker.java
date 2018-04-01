@@ -50,7 +50,10 @@ public class ConsistencyChecker {
     @Autowired
     private VisitMRepository visitMRepository;
 
+    private HashFunction hf;
+
     public int check(){
+        hf = Hashing.md5();
         checkOwners();
         checkVet();
         return 0;
@@ -68,17 +71,16 @@ public class ConsistencyChecker {
         return 0;
     }
 
-    private void checkVet(){
+    private int checkVet(){
         Collection<Vet> vetData = vetRepository.findAll();
         Collection<MVet> mVetData = vetMRepository.findAll();
 
         ArrayList<Vet> vets = new ArrayList<>(vetData);
         ArrayList<MVet> mVets = new ArrayList<>(mVetData);
 
-        HashFunction hf = Hashing.md5();
-
         for(int i=0; i<vets.size(); i++){
-            MVet original = ForkLift.convertVetToMVet(vets.get(i));
+            //MVet original = ForkLift.convertVetToMVet(vets.get(i));
+            Vet original = vets.get(i);
             MVet migrated = mVets.get(i);
 
             HashCode codeOriginal = hf.newHasher()
@@ -93,7 +95,15 @@ public class ConsistencyChecker {
             System.out.println(migrated.toString());
             System.out.println(codeOriginal.toString());
             System.out.println(codeMigrated.toString());
+            if(codeOriginal.equals(codeMigrated.toString())){
+                System.out.println("INCONSISTENCY FOUND, INSERTING OBJECT AGAIN");
+                System.out.println(original.toString());
+                System.out.println(migrated.toString());
+            }
+
+
         }
+        return 0;
     }
 
 }
