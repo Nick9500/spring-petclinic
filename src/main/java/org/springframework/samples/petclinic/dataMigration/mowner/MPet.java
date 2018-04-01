@@ -11,7 +11,6 @@ import java.util.*;
 
 @Document(collection="pets")
 public class MPet extends MNamedEntity {
-
     private Date birthDate;
 
     private PetType type;
@@ -40,7 +39,7 @@ public class MPet extends MNamedEntity {
         return this.owner;
     }
 
-    protected void setOwner(MOwner owner) {
+    public void setOwner(MOwner owner) {
         this.owner = owner;
     }
 
@@ -65,5 +64,14 @@ public class MPet extends MNamedEntity {
     public void addVisit(MVisit visit) {
         getVisitsInternal().add(visit);
         visit.setPetId(this.getId());
+    }
+
+    @Override
+    public String toString() {
+        return "MPet{" +
+            "birthDate=" + birthDate +
+            ", type=" + type +
+            ", owner=" + owner +
+            '}';
     }
 }

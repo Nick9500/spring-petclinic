@@ -2,9 +2,7 @@ package org.springframework.samples.petclinic.dataMigration.model;
 
 public class MPerson extends MBaseEntity {
 
-//    @NotEmpty
     private String firstName;
-//    @NotEmpty
     private String lastName;
 
     public String getFirstName() {
@@ -21,5 +19,13 @@ public class MPerson extends MBaseEntity {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    @Override
+    public String toString() {
+        return "MPerson{" +
+            "firstName='" + firstName + '\'' +
+            ", lastName='" + lastName + '\'' +
+            '}';
     }
 }

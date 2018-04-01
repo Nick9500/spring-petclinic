@@ -22,6 +22,13 @@ public class MVet extends MPerson{
         specialties.add(mSpecialty);
     }
 
+    @Override
+    public String toString() {
+        String s = "Id: " + this.getId() + " FirstName: " + this.getFirstName() + " LastName: " + this.getLastName() + " specialties=" + specialties.toString() + "}";
+        return s;
+    }
+
+
 //    private Set<Specialty> specialties;
 //
 //    protected Set<Specialty> getSpecialtiesInternal() {
