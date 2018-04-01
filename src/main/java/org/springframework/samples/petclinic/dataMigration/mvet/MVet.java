@@ -3,10 +3,24 @@ package org.springframework.samples.petclinic.dataMigration.mvet;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.samples.petclinic.dataMigration.model.MPerson;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 @Document(collection = "vets")
 public class MVet extends MPerson{
 
+    private Set<MSpecialty> specialties = new HashSet<MSpecialty>();
+
+    public void setSpecialties(Set<MSpecialty> specialties){
+        this.specialties = specialties;
+    }
+
+    public void addSpecialty(MSpecialty mSpecialty){
+        specialties.add(mSpecialty);
+    }
 
 //    private Set<Specialty> specialties;
 //

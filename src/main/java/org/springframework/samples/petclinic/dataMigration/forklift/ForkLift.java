@@ -1,17 +1,23 @@
 package org.springframework.samples.petclinic.dataMigration.forklift;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvet.MSpecialty;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.vet.Specialty;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.stereotype.Component;
 
+import javax.management.Query;
 import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class ForkLift {
@@ -53,14 +59,26 @@ public class ForkLift {
 
     private void vetForklift(){
         System.out.println("Start vets forklift");
-        Collection<Vet> data = vetRepository.findAll();
-        for(Vet v: data){
+        vetMRepository.deleteAll();
+        Collection<Vet> vetData = vetRepository.findAll();
+        for(Vet v: vetData){
             MVet mVet = new MVet();
             mVet.setId(v.getId().toString());
             mVet.setFirstName(v.getFirstName());
             mVet.setLastName(v.getLastName());
+            List<Specialty> specialties = v.getSpecialties();
+            if(!specialties.isEmpty()){
+                for(Specialty s: specialties){
+                    MSpecialty newMSpecialty = new MSpecialty();
+                    newMSpecialty.setName(s.getName());
+                    mVet.addSpecialty(newMSpecialty);
+                }
+            }
             vetMRepository.save(mVet);
         }
+
+        Collection<Specialty> specialtyData = new Vet().getSpecialties();
+
         System.out.println("Done vets forklift");
     }
 }
