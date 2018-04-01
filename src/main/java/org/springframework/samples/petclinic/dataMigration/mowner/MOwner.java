@@ -55,7 +55,7 @@ public class MOwner extends MPerson {
         return this.pets;
     }
 
-    protected void setPetsInternal(Set<MPet> pets) {
+    public void setPets(Set<MPet> pets) {
         this.pets = pets;
     }
 

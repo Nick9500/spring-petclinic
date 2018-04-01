@@ -22,7 +22,9 @@ import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class ForkLift {
@@ -96,6 +98,8 @@ public class ForkLift {
 
         for (Pet pet : forkliftDataPets){
             MPet mpet = convertPetToMPet(pet);
+            MOwner mOwner = convertOwnerToMOwner(pet.getOwner());
+            mpet.setOwner(mOwner);
             System.out.println(mpet);
             petMRepository.save(mpet);
 
@@ -135,6 +139,14 @@ public class ForkLift {
         mowner.setAddress(owner.getAddress());
         mowner.setCity(owner.getCity());
         mowner.setTelephone(owner.getTelephone());
+        Set<MPet> MPets = new HashSet<>();
+        for(Pet pet : owner.getPets()){
+            MPet a = convertPetToMPet(pet);
+            a.setOwner(mowner);
+            MPets.add(convertPetToMPet(pet));
+
+        }
+        mowner.setPets(MPets);
         return mowner;
     }
 
