@@ -40,7 +40,7 @@ public class MPet extends MNamedEntity {
         return this.owner;
     }
 
-    protected void setOwner(MOwner owner) {
+    public void setOwner(MOwner owner) {
         this.owner = owner;
     }
 
