@@ -4,7 +4,6 @@ public class MPerson extends MBaseEntity {
 
 //    @NotEmpty
     private String firstName;
-
 //    @NotEmpty
     private String lastName;
 

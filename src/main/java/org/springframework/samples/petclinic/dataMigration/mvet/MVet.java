@@ -7,12 +7,6 @@ import org.springframework.samples.petclinic.dataMigration.model.MPerson;
 @Document(collection = "vets")
 public class MVet extends MPerson{
 
-    private int oldId;  //mysql ID
-
-    public int getOldId(){return this.oldId;}
-
-    public void setOldId(int oldId) {this.oldId = oldId;}
-
 
 //    private Set<Specialty> specialties;
 //
