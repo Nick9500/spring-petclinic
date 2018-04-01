@@ -89,6 +89,8 @@ public class ConsistencyChecker {
                 .hash();
 
             System.out.println("HASH CODES");
+            System.out.println(original.toString());
+            System.out.println(migrated.toString());
             System.out.println(codeOriginal.toString());
             System.out.println(codeMigrated.toString());
         }
