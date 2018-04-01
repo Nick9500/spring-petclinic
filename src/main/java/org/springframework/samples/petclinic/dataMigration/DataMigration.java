@@ -13,5 +13,6 @@ public class DataMigration {
     public void start(){
         System.out.println("Data Migration to MongoDb Starting...");
         forkLift.start();
+        //consistency check
     }
 }
