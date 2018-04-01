@@ -43,4 +43,13 @@ public class MVisit {
     public void setPetId(String petId) {
         this.petId = petId;
     }
+
+    @Override
+    public String toString() {
+        return "MVisit{" +
+            "date=" + date +
+            ", description='" + description + '\'' +
+            ", petId='" + petId + '\'' +
+            '}';
+    }
 }
