@@ -1,6 +1,7 @@
 package org.springframework.samples.petclinic.dataMigration.forklift;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.dataMigration.consistencyChecking.ConsistencyChecking;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
 import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
@@ -48,11 +49,16 @@ public class ForkLift {
     @Autowired
     VisitMRepository visitMRepository;
 
+    @Autowired
+    ConsistencyChecking cc;
+
     public void start(){
         forkLiftOwner();
         forkLiftVisits();
         forkliftPets();
         vetForklift();
+        cc = new ConsistencyChecking();
+        cc.checkVet(vetRepository.findAll(), vetMRepository.findAll());
     }
 
     private void forkLiftOwner() {
@@ -163,7 +169,7 @@ public class ForkLift {
         return mvisit;
     }
 
-    private MVet convertVetToMVet(Vet v) {
+    public static MVet convertVetToMVet(Vet v) {
         MVet mVet = new MVet();
         mVet.setId(v.getId().toString());
         mVet.setFirstName(v.getFirstName());
