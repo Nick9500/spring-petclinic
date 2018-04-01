@@ -4,8 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.mongoSampleIntegration.EmployeeRepository;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
+import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -20,6 +24,11 @@ public class ForkLift {
 
     @Autowired
     OwnerRepository ownerRepository;
+
+    @Autowired
+    VetRepository vetRepository;
+    @Autowired
+    VetMRepository vetMRepository;
 
     public void start(){
         System.out.println("Start forklifting...");
@@ -42,7 +51,22 @@ public class ForkLift {
             ownerMRepository.save(mowner);
 
         }
+
+        vetForklift();
+
         System.out.println("Done forklifting");
 
+    }
+
+
+    private void vetForklift(){
+        Collection<Vet> data = vetRepository.findAll();
+        for(Vet v: data){
+            MVet mVet = new MVet();
+            mVet.setFirstName(v.getFirstName());
+            mVet.setLastName(v.getLastName());
+            mVet.setOldId(v.getId());
+            vetMRepository.save(mVet);
+        }
     }
 }
