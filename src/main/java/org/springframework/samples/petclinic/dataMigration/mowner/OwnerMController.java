@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.dataMigration.forklift;
+package org.springframework.samples.petclinic.dataMigration.mowner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;

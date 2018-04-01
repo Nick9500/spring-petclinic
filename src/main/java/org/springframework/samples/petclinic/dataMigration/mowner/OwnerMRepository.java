@@ -1,4 +1,4 @@
-package org.springframework.samples.petclinic.dataMigration.forklift;
+package org.springframework.samples.petclinic.dataMigration.mowner;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.samples.petclinic.owner.Owner;
