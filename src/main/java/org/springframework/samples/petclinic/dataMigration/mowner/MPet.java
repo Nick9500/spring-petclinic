@@ -69,7 +69,8 @@ public class MPet extends MNamedEntity {
     @Override
     public String toString() {
         return "MPet{" +
-            "birthDate=" + birthDate +
+            "name=" + this.getName() +
+            ", birthDate=" + birthDate +
             ", type=" + type +
             ", owner=" + owner +
             '}';
