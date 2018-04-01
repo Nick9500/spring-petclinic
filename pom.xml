@@ -79,6 +79,14 @@
             <artifactId>spring-data-mongodb</artifactId>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>24.1-jre</version>
+        </dependency>
+
+
         <!-- caching -->
         <dependency>
             <groupId>javax.cache</groupId>
