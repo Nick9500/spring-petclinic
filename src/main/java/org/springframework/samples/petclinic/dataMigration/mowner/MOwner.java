@@ -11,17 +11,12 @@ import java.util.*;
 @Document(collection="owners")
 public class MOwner extends MPerson {
 
-//    @NotEmpty
     private String address;
 
-//    @NotEmpty
     private String city;
 
-//    @NotEmpty
-//    @Digits(fraction = 0, integer = 10)
     private String telephone;
 
-//    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "owner")
     private Set<MPet> pets;
 
     public String getAddress() {
@@ -55,7 +50,7 @@ public class MOwner extends MPerson {
         return this.pets;
     }
 
-    protected void setPetsInternal(Set<MPet> pets) {
+    public void setPets(Set<MPet> pets) {
         this.pets = pets;
     }
 
