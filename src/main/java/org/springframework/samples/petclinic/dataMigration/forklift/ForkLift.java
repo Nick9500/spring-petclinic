@@ -1,9 +1,9 @@
 package org.springframework.samples.petclinic.dataMigration.forklift;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
-import org.springframework.samples.petclinic.dataMigration.mongoSampleIntegration.Employee;
 import org.springframework.samples.petclinic.dataMigration.mongoSampleIntegration.EmployeeRepository;
+import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
+import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.stereotype.Component;
@@ -28,11 +28,18 @@ public class ForkLift {
         Collection<Owner> forkliftData = ownerRepository.findAll();
         for (Owner owner : forkliftData){
             //testing Saving objects into Employee table
-            employeeRepository.save(new Employee(owner.getFirstName(), owner.getLastName()));
-            System.out.println(employeeRepository.findByFirstName(owner.getFirstName()));
+//            employeeRepository.save(new Employee(owner.getFirstName(), owner.getLastName()));
+//            System.out.println(employeeRepository.findByFirstName(owner.getFirstName()));
 
             //BROKEN AS FK
-//            ownerMRepository.save(owner);
+            MOwner mowner = new MOwner();
+            mowner.setFirstName(owner.getFirstName());
+            mowner.setFirstName(owner.getLastName());
+            mowner.setAddress(owner.getAddress());
+            mowner.setCity(owner.getCity());
+            mowner.setTelephone(owner.getTelephone());
+
+            ownerMRepository.save(mowner);
 
         }
         System.out.println("Done forklifting");

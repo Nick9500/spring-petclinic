@@ -1,13 +1,11 @@
 package org.springframework.samples.petclinic.dataMigration.model;
 
-import javax.validation.constraints.NotEmpty;
-
 public class MPerson extends MBaseEntity {
 
-    @NotEmpty
+//    @NotEmpty
     private String firstName;
 
-    @NotEmpty
+//    @NotEmpty
     private String lastName;
 
     public String getFirstName() {

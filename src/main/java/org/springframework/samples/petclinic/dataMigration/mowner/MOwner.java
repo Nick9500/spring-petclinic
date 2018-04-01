@@ -3,31 +3,26 @@ package org.springframework.samples.petclinic.dataMigration.mowner;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.samples.petclinic.dataMigration.model.MPerson;
-import org.springframework.samples.petclinic.owner.Pet;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotEmpty;
 import java.util.*;
 
+@Document(collection="owners")
 public class MOwner extends MPerson {
 
-    @NotEmpty
+//    @NotEmpty
     private String address;
 
-    @NotEmpty
+//    @NotEmpty
     private String city;
 
-    @NotEmpty
+//    @NotEmpty
 //    @Digits(fraction = 0, integer = 10)
     private String telephone;
 
 //    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "owner")
-    private Set<Pet> pets;
+    private Set<MPet> pets;
 
     public String getAddress() {
         return this.address;
@@ -53,25 +48,25 @@ public class MOwner extends MPerson {
         this.telephone = telephone;
     }
 
-    protected Set<Pet> getPetsInternal() {
+    protected Set<MPet> getPetsInternal() {
         if (this.pets == null) {
             this.pets = new HashSet<>();
         }
         return this.pets;
     }
 
-    protected void setPetsInternal(Set<Pet> pets) {
+    protected void setPetsInternal(Set<MPet> pets) {
         this.pets = pets;
     }
 
-    public List<Pet> getPets() {
-        List<Pet> sortedPets = new ArrayList<>(getPetsInternal());
+    public List<MPet> getPets() {
+        List<MPet> sortedPets = new ArrayList<>(getPetsInternal());
         PropertyComparator.sort(sortedPets,
             new MutableSortDefinition("name", true, true));
         return Collections.unmodifiableList(sortedPets);
     }
 
-    public void addPet(Pet pet) {
+    public void addPet(MPet pet) {
         if (pet.isNew()) {
             getPetsInternal().add(pet);
         }
@@ -84,7 +79,7 @@ public class MOwner extends MPerson {
      * @param name to test
      * @return true if pet name is already in use
      */
-    public Pet getPet(String name) {
+    public MPet getPet(String name) {
         return getPet(name, false);
     }
 
@@ -94,9 +89,9 @@ public class MOwner extends MPerson {
      * @param name to test
      * @return true if pet name is already in use
      */
-    public Pet getPet(String name, boolean ignoreNew) {
+    public MPet getPet(String name, boolean ignoreNew) {
         name = name.toLowerCase();
-        for (Pet pet : getPetsInternal()) {
+        for (MPet pet : getPetsInternal()) {
             if (!ignoreNew || !pet.isNew()) {
                 String compName = pet.getName();
                 compName = compName.toLowerCase();
