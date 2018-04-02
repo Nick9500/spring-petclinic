@@ -44,7 +44,7 @@ public class ShadowOps {
     public boolean shadowWrite( Visit visit, MVisit mvisit ) {
         shadowWriteOldVisit( visit );
         shadowWriteNewMVisit( mvisit );
-        return shadowWriterConsistencyCheck();
+        return shadowWriterConsistencyCheck(visit, mvisit);
     }
 
     public void shadowWriteOldVisit( Visit visit ){

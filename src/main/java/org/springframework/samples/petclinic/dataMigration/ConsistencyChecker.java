@@ -39,7 +39,7 @@ public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
     HashFunction hf = Hashing.sha256();
-    private static boolean flag = false;
+    private static boolean doneForklifting = false;
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -67,7 +67,7 @@ public class ConsistencyChecker {
     @Scheduled(cron = "*/60 * * * * *")
     @Async("ConsistencyCheckerThread")
     public void check(){
-    	if(flag) {
+    	if(doneForklifting) {
 	        System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
 	        numberOfInconsistency += checkOwners();
 	        numberOfInconsistency += checkVet();
@@ -77,8 +77,8 @@ public class ConsistencyChecker {
     	}
     }
 
-    public static void setFlag() {
-    	flag = true;
+    public static void enableChecks() {
+    	doneForklifting = true;
     }
 
     private int checkOwners(){

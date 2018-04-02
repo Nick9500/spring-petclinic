@@ -52,7 +52,7 @@ public class ForkLift {
         forkLiftVisits();
         forkliftPets();
         vetForklift();
-        ConsistencyChecker.setFlag();
+        ConsistencyChecker.enableChecks();
     }
 
     private void forkLiftOwner() {
