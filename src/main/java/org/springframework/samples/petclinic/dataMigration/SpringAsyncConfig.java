@@ -12,7 +12,7 @@ import java.util.concurrent.Executor;
 @EnableScheduling
 @EnableAsync
 public class SpringAsyncConfig {
-    @Bean(name = "threadPoolTaskExecutor")
+    @Bean(name = "ConsistencyCheckerThread")
     public Executor threadPoolTaskExecutor() {
         return new ThreadPoolTaskExecutor();
     }

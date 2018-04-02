@@ -64,15 +64,16 @@ public class ConsistencyChecker {
     @Autowired
     private MigrationServices migrationServices;
 
-    @Scheduled(cron = "*/1 * * * * *")
-    @Async("threadPoolTaskExecutor")
+    @Scheduled(cron = "*/60 * * * * *")
+    @Async("ConsistencyCheckerThread")
     public void check(){
     	if(flag) {
-        numberOfInconsistency += checkOwners();
-        numberOfInconsistency += checkVet();
-        numberOfInconsistency += checkPets();
-        numberOfInconsistency += checkVisits();
-    	migrationServices.printBanner("No. inconsistencies found in total: " + numberOfInconsistency);
+	        System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
+	        numberOfInconsistency += checkOwners();
+	        numberOfInconsistency += checkVet();
+	        numberOfInconsistency += checkPets();
+	        numberOfInconsistency += checkVisits();
+	    	migrationServices.printBanner("No. inconsistencies found in total: " + numberOfInconsistency);
     	}
     }
     
