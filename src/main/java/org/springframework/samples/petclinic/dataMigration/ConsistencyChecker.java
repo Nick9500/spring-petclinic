@@ -39,6 +39,7 @@ public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
     HashFunction hf = Hashing.sha256();
+    private static boolean flag = false;
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -63,15 +64,20 @@ public class ConsistencyChecker {
     @Autowired
     private MigrationServices migrationServices;
 
-    @Scheduled(cron = "*/60 * * * * *")
+    @Scheduled(cron = "*/1 * * * * *")
     @Async("threadPoolTaskExecutor")
-    public Future<Integer> check(){
+    public void check(){
+    	if(flag) {
         numberOfInconsistency += checkOwners();
         numberOfInconsistency += checkVet();
         numberOfInconsistency += checkPets();
         numberOfInconsistency += checkVisits();
-
-        return new AsyncResult(numberOfInconsistency);
+    	migrationServices.printBanner("No. inconsistencies found in total: " + numberOfInconsistency);
+    	}
+    }
+    
+    public static void setFlag() {
+    	flag = true;
     }
 
     private int checkOwners(){
