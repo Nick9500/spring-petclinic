@@ -9,7 +9,7 @@ import java.util.*;
 @Document(collection = "vets")
 public class MVet extends MPerson{
 
-    private List<MSpecialty> specialties = new ArrayList<MSpecialty>();
+    private List<MSpecialty> specialties = new ArrayList<>();
 
     public void setSpecialties(List<MSpecialty> specialties){
         this.specialties = specialties;

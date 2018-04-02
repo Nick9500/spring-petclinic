@@ -169,13 +169,11 @@ public class ForkLift {
         mVet.setFirstName(v.getFirstName());
         mVet.setLastName(v.getLastName());
         List<Specialty> specialties = v.getSpecialties();
-        System.out.println(specialties.toString());
         if (!specialties.isEmpty()) {
             for (Specialty s : specialties) {
                 MSpecialty newMSpecialty = new MSpecialty();
                 newMSpecialty.setName(s.getName());
                 mVet.addSpecialty(newMSpecialty);
-                System.out.println(newMSpecialty.getName());
             }
         }
         return mVet;
