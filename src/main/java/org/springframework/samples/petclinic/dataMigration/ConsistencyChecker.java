@@ -7,6 +7,7 @@ import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.model.MBaseEntity;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
+import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
@@ -16,6 +17,7 @@ import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMReposito
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
@@ -61,6 +63,7 @@ public class ConsistencyChecker {
         ms = new MigrationServices();
         checkOwners();
         checkVet();
+        checkPets();
         checkVisits();
         return 0;
     }
@@ -85,8 +88,6 @@ public class ConsistencyChecker {
                 inconsistencies ++;
             }
         }
-
-
         return inconsistencies;
     }
 
@@ -110,6 +111,34 @@ public class ConsistencyChecker {
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 vetMRepository.save(ms.convertVetToMVet(original));
+            }
+        }
+        return inconsistencies;
+    }
+
+    private int checkPets() {
+        System.out.println("Checking Pets");
+
+        int inconsistencies = 0;
+        Collection<Pet> petData = petRepository.findAll();
+        Collection<MPet> mPetData = petMRepository.findAll();
+
+        ArrayList<Pet> pets = new ArrayList<>(petData);
+        ArrayList<MPet> mPets = new ArrayList<>(mPetData);
+
+        for(int i=0; i<pets.size(); i++){
+
+            Pet original = pets.get(i);
+            MPet migrated = mPets.get(i);
+
+            if(!compareActualAndExpected(original, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                MPet newMPet = ms.convertPetToMPet(original);
+                // setting the owner isn't done in convertPetToMPet, so do it outside of method call
+                MOwner mOwner = ms.convertOwnerToMOwner(original.getOwner());
+                newMPet.setOwner(mOwner);
+                petMRepository.save(newMPet);
             }
         }
         return inconsistencies;

@@ -3,10 +3,14 @@ package org.springframework.samples.petclinic.dataMigration.mowner;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.dataMigration.model.MNamedEntity;
 import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.owner.PetType;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Document(collection="pets")
@@ -68,11 +72,11 @@ public class MPet extends MNamedEntity {
 
     @Override
     public String toString() {
-        return "MPet{" +
+        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd");
+        return
             "name=" + this.getName() +
-            ", birthDate=" + birthDate +
+            ", birthDate=" + dt.format(birthDate) +
             ", type=" + type +
-            ", owner=" + owner +
-            '}';
+            ", owner=" + owner;
     }
 }

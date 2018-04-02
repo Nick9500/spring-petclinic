@@ -114,4 +114,13 @@ public class Pet extends NamedEntity {
         visit.setPetId(this.getId());
     }
 
+    @Override
+    public String toString() {
+        return
+            "name=" + this.getName() +
+                ", birthDate=" + birthDate +
+                ", type=" + type +
+                ", owner=" + owner;
+    }
+
 }
