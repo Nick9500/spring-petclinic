@@ -46,8 +46,17 @@ public class ShadowWrites {
 
     }
 
-    public void save(@Valid Visit visit) {
+    public void save(@Valid Vet vet) {
     }
 
-
+    @Async("ShadowWriteThread")
+    public void save(@Valid Visit visit) {
+        migrationServices.printBanner("Shadow writing with thread: " + Thread.currentThread().getName());
+        System.out.println("Shadow Writing Visits in progress");
+        visitMRepository.save(migrationServices.convertVisitToMvisit(visit));
+        if (!cc.compareActualAndExpected(visit, migrationServices.convertVisitToMvisit(visit))) {
+            System.out.println("ShadowWrite Consistency Check has Failed");
+        }
+        System.out.println("Shadow Write Visit Success");
+    }
 }
