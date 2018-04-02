@@ -16,6 +16,7 @@
 package org.springframework.samples.petclinic.owner;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.dataMigration.ShadowWrites;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Controller;
@@ -38,12 +39,14 @@ class VisitController {
 
     private final VisitRepository visits;
     private final PetRepository pets;
+    private final ShadowWrites shadowWrites;
 
 
     @Autowired
-    public VisitController(VisitRepository visits, PetRepository pets) {
+    public VisitController(VisitRepository visits, PetRepository pets, ShadowWrites shadowWrites) {
         this.visits = visits;
         this.pets = pets;
+        this.shadowWrites = shadowWrites;
     }
 
     @InitBinder
@@ -83,6 +86,7 @@ class VisitController {
             return "pets/createOrUpdateVisitForm";
         } else {
             this.visits.save(visit);
+            this.shadowWrites.save(visit);
             return "redirect:/owners/{ownerId}";
         }
     }

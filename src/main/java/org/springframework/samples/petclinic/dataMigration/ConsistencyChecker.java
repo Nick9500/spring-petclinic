@@ -24,14 +24,12 @@ import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Component
@@ -39,7 +37,7 @@ public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
     HashFunction hf = Hashing.sha256();
-    private static boolean flag = false;
+    private static boolean doneForklifting = false;
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -67,7 +65,7 @@ public class ConsistencyChecker {
     @Scheduled(cron = "*/60 * * * * *")
     @Async("ConsistencyCheckerThread")
     public void check(){
-    	if(flag) {
+    	if(doneForklifting) {
 	        System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
 	        numberOfInconsistency += checkOwners();
 	        numberOfInconsistency += checkVet();
@@ -77,8 +75,8 @@ public class ConsistencyChecker {
     	}
     }
 
-    public static void setFlag() {
-    	flag = true;
+    public static void enableChecks() {
+    	doneForklifting = true;
     }
 
     private int checkOwners(){
@@ -138,29 +136,29 @@ public class ConsistencyChecker {
         migrationServices.printBanner("Checking for inconsistencies in 'pets'");
 
         int inconsistencies = 0;
-        Collection<Pet> petData = petRepository.findAll();
-        Collection<MPet> mPetData = petMRepository.findAll();
+        Map<Integer, Pet> actualCollection = petRepository.findAll().stream()
+            .collect(Collectors.toMap(pet -> pet.getId(), pet -> pet));
 
-        ArrayList<Pet> pets = new ArrayList<>(petData);
-        ArrayList<MPet> mPets = new ArrayList<>(mPetData);
+        Map<String, MPet> expectedCollections = petMRepository.findAll().stream()
+            .collect(Collectors.toMap(pet -> pet.getId(), pet -> pet));
 
-        for(int i=0; i<pets.size(); i++){
 
-            Pet original = pets.get(i);
-            MPet migrated = mPets.get(i);
+        for(Integer x : actualCollection.keySet()){
+            Pet actual = actualCollection.get(x);
+            MPet migrated = expectedCollections.get(x.toString());
 
-            if(!compareActualAndExpected(original, migrated)){
+            if(!compareActualAndExpected(actual, migrated)){
+                //inconsistencies
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-                MPet newMPet = migrationServices.convertPetToMPet(original);
+                MPet newMPet = migrationServices.convertPetToMPet(actual);
                 // setting the owner isn't done in convertPetToMPet, so do it outside of method call
-                MOwner mOwner = migrationServices.convertOwnerToMOwner(original.getOwner());
+                MOwner mOwner = migrationServices.convertOwnerToMOwner( actual.getOwner());
                 newMPet.setOwner(mOwner);
                 petMRepository.save(newMPet);
             }
         }
-
-        migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
+        migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
         return inconsistencies;
     }
 
@@ -209,6 +207,28 @@ public class ConsistencyChecker {
 
         return consistent;
     }
+
+    public boolean shadowWriteConsistencyCheck(Owner owner){
+        Owner actual = ownerRepository.findById(owner.getId());
+        MOwner expected = ownerMRepository.findById(owner.getId().toString()).get();
+
+        return compareActualAndExpected(actual, expected);
+    }
+
+    public boolean shadowWriteConsistencyCheck(Pet pet){
+        Pet actual = petRepository.findById(pet.getId());
+        MPet expected = petMRepository.findById(pet.getId().toString()).get();
+
+        return compareActualAndExpected(actual, expected);
+    }
+
+    public boolean shadowWriteConsistencyCheck(Visit visit){
+        Pet actual = petRepository.findById(visit.getId());
+        MPet expected = petMRepository.findById(visit.getId().toString()).get();
+
+        return compareActualAndExpected(actual, expected);
+    }
+
 
 
 }

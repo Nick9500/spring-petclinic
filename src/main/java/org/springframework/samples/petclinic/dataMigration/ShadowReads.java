@@ -42,9 +42,9 @@ public class ShadowReads {
     private ConsistencyChecker consistencyChecker;
 
     // shadow read for owner method findById
-    public void OwnerFindById(Integer id,  Mid){
+    public void OwnerFindById(Integer id,  String Mid){
         Owner original = ownerRepository.findById(id);
-        MOwner migrated = ownerMRepository.findById(Mid);
+        MOwner migrated = ownerMRepository.findById(Mid).get();
          if(!(consistencyChecker.compareActualAndExpected(original, migrated))){
              System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
              ownerMRepository.save(migrationServices.convertOwnerToMOwner(original));

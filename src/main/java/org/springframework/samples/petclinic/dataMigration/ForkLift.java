@@ -52,7 +52,7 @@ public class ForkLift {
         forkLiftVisits();
         forkliftPets();
         vetForklift();
-        ConsistencyChecker.setFlag();
+        ConsistencyChecker.enableChecks();
     }
 
     private void forkLiftOwner() {
@@ -122,7 +122,7 @@ public class ForkLift {
 
         Collection<Specialty> specialtyData = new Vet().getSpecialties();
 
-        migrationServices.printBanner("Finished forklifting 'pets'");
+        migrationServices.printBanner("Finished forklifting 'vets'");
 
     }
 

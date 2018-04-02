@@ -1,13 +1,14 @@
 package org.springframework.samples.petclinic.dataMigration.mvisit;
 
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.samples.petclinic.dataMigration.model.MBaseEntity;
-import org.springframework.samples.petclinic.model.BaseEntity;
 
 import java.util.Date;
 
 /**
  * Created by ericxiao on 2018-04-01.
  */
+@Document(collection = "visits")
 public class MVisit extends MBaseEntity {
 
     private Date date;

@@ -78,10 +78,13 @@ public class MigrationServices {
         MPet mpet = new MPet();
         mpet.setBirthDate(pet.getBirthDate());
         mpet.setType(pet.getType());
-        mpet.setId(pet.getId().toString());
+        if(pet.getId() != null) {
+            mpet.setId(pet.getId().toString());
+        }
         mpet.setName(pet.getName());
         return mpet;
     }
+
 
     /**
      * Method to prints banners to show that forklifting entity starts/finished
