@@ -48,17 +48,16 @@ public class ShadowWrites {
         migrationServices.printBanner("Shadow writing pet with thread: "+Thread.currentThread().getName());
 
         MPet mpet = migrationServices.convertPetToMPet(pet);
-        mpet.setId(String.valueOf(petRepository.findLastId()+1));
         mpet.setOwner(migrationServices.convertOwnerToMOwner(pet.getOwner()));
 
         petMRepository.save(mpet);
-        cc.shadowWriteConsitencyCheck(pet);
+        cc.shadowWriteConsistencyCheck(pet);
     }
 
     @Async("ShadowWriteThread")
     public void save(@Valid Visit visit) {
         migrationServices.printBanner("Shadow writing visit with thread: " + Thread.currentThread().getName());
         visitMRepository.save(migrationServices.convertVisitToMvisit(visit));
-        cc.shadowWriteConsitencyCheck(visit);
+        cc.shadowWriteConsistencyCheck(visit);
     }
 }
