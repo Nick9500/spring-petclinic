@@ -23,17 +23,23 @@ import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Component
 public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
+    HashFunction hf = Hashing.sha256();
+    private static boolean flag = false;
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -58,13 +64,21 @@ public class ConsistencyChecker {
     @Autowired
     private MigrationServices migrationServices;
 
-    public int check(){
-        numberOfInconsistency += checkOwners();
-        numberOfInconsistency += checkVet();
-        numberOfInconsistency += checkPets();
-        numberOfInconsistency += checkVisits();
-
-        return numberOfInconsistency;
+    @Scheduled(cron = "*/60 * * * * *")
+    @Async("ConsistencyCheckerThread")
+    public void check(){
+    	if(flag) {
+	        System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
+	        numberOfInconsistency += checkOwners();
+	        numberOfInconsistency += checkVet();
+	        numberOfInconsistency += checkPets();
+	        numberOfInconsistency += checkVisits();
+	    	migrationServices.printBanner("No. inconsistencies found in total: " + numberOfInconsistency);
+    	}
+    }
+    
+    public static void setFlag() {
+    	flag = true;
     }
 
     private int checkOwners(){
@@ -178,9 +192,6 @@ public class ConsistencyChecker {
     }
 
     private boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
-        HashFunction hf = Hashing.md5();
-
-
         System.out.println("actual:" + a.toString());
         System.out.println("migrated:" + m.toString());
 

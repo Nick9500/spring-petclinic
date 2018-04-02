@@ -9,14 +9,10 @@ public class DataMigration {
     @Autowired
     private ForkLift forkLift;
 
-    @Autowired
-    private ConsistencyChecker consistencyChecker;
-
     public void start() {
         System.out.println("Data Migration to MongoDb Starting...");
         forkLift.start();
-        //consistency check
-        System.out.println("Consistency Checking active...");
-        consistencyChecker.check();
+
     }
+
 }
