@@ -24,14 +24,12 @@ import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Component
@@ -192,9 +190,6 @@ public class ConsistencyChecker {
     }
 
     public boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
-        HashFunction hf = Hashing.md5();
-
-
         System.out.println("actual:" + a.toString());
         System.out.println("migrated:" + m.toString());
 
@@ -211,6 +206,13 @@ public class ConsistencyChecker {
         System.out.println("\n");
 
         return consistent;
+    }
+
+    public boolean shadowWriteConsistencyCheck(Owner owner){
+        Owner actual = ownerRepository.findById(owner.getId());
+        MOwner expected = ownerMRepository.findById(owner.getId().toString()).get();
+
+        return compareActualAndExpected(actual, expected);
     }
 
 
