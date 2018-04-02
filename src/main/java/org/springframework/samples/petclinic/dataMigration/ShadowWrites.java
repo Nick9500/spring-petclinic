@@ -51,16 +51,16 @@ public class ShadowWrites {
     @Async("ShadowWriteThread")
     public void save(@Valid Pet pet) {
         migrationServices.printBanner("Shadow writing with thread: "+Thread.currentThread().getName());
+        System.out.println("Shadow Writing Pets in progress");
         MPet mpet = migrationServices.convertPetToMPet(pet);
         mpet.setId(String.valueOf(petRepository.findLastId()+1));
-        System.out.println(pet.getOwner());
         mpet.setOwner(migrationServices.convertOwnerToMOwner(pet.getOwner()));
         petMRepository.save(mpet);
 
         if (!cc.compareActualAndExpected(pet, mpet)) {
             System.out.println("ShadowWrite Consistency Check has Failed");
         }
-        System.out.println("Shadow Write Visit Success");
+        System.out.println("Shadow Write Pets Success");
     }
 
     public void save(@Valid Vet vet) {
