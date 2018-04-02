@@ -11,6 +11,7 @@ import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMReposito
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.owner.Owner;
@@ -18,6 +19,7 @@ import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
+import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +61,7 @@ public class ConsistencyChecker {
         ms = new MigrationServices();
         checkOwners();
         checkVet();
-
+        checkVisits();
         return 0;
     }
 
@@ -108,6 +110,28 @@ public class ConsistencyChecker {
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 vetMRepository.save(ms.convertVetToMVet(original));
+            }
+        }
+        return inconsistencies;
+    }
+
+    private int checkVisits() {
+        System.out.println("Checking Visits");
+        int inconsistencies = 0;
+
+        Collection<Visit> actualCollection = visitRepository.findAll();
+        Collection<MVisit> expectedCollection = visitMRepository.findAll();
+
+        ArrayList<Visit> visits = new ArrayList<>(actualCollection);
+        ArrayList<MVisit> mVisits = new ArrayList<>(expectedCollection);
+
+        for (int i=0; i<actualCollection.size();i++){
+            Visit actual = visits.get(i);
+            MVisit migrated = mVisits.get(i);
+            if(!compareActualAndExpected(actual, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                visitMRepository.save(ms.convertVisitToMvisit(actual));
             }
         }
         return inconsistencies;
