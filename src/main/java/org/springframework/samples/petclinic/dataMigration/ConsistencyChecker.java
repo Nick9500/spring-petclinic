@@ -5,7 +5,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.dataMigration.forklift.ForkLift;
 import org.springframework.samples.petclinic.dataMigration.model.MBaseEntity;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
+    private MigrationServices ms;
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -52,7 +52,11 @@ public class ConsistencyChecker {
     @Autowired
     private VisitMRepository visitMRepository;
 
+    @Autowired
+    private MigrationServices migrationServices;
+
     public int check(){
+        ms = new MigrationServices();
         checkOwners();
         checkVet();
 
@@ -103,7 +107,7 @@ public class ConsistencyChecker {
             if(!compareActualAndExpected(original, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-                //vetMRepository.save()
+                vetMRepository.save(ms.convertVetToMVet(original));
             }
         }
         return inconsistencies;
@@ -128,5 +132,6 @@ public class ConsistencyChecker {
 
         return codeOriginal.equals(codeMigrated);
     }
+
 
 }
