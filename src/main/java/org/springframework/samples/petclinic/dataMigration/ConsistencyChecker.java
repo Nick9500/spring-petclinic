@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
-    private MigrationServices ms;
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -60,12 +59,12 @@ public class ConsistencyChecker {
     private MigrationServices migrationServices;
 
     public int check(){
-        ms = new MigrationServices();
-        checkOwners();
-        checkVet();
-        checkPets();
-        checkVisits();
-        return 0;
+        numberOfInconsistency += checkOwners();
+        numberOfInconsistency += checkVet();
+        numberOfInconsistency += checkPets();
+        numberOfInconsistency += checkVisits();
+
+        return numberOfInconsistency;
     }
 
     private int checkOwners(){
@@ -110,7 +109,7 @@ public class ConsistencyChecker {
             if(!compareActualAndExpected(original, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-                vetMRepository.save(ms.convertVetToMVet(original));
+                vetMRepository.save(migrationServices.convertVetToMVet(original));
             }
         }
         return inconsistencies;
@@ -134,9 +133,9 @@ public class ConsistencyChecker {
             if(!compareActualAndExpected(original, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-                MPet newMPet = ms.convertPetToMPet(original);
+                MPet newMPet = migrationServices.convertPetToMPet(original);
                 // setting the owner isn't done in convertPetToMPet, so do it outside of method call
-                MOwner mOwner = ms.convertOwnerToMOwner(original.getOwner());
+                MOwner mOwner = migrationServices.convertOwnerToMOwner(original.getOwner());
                 newMPet.setOwner(mOwner);
                 petMRepository.save(newMPet);
             }
@@ -162,7 +161,7 @@ public class ConsistencyChecker {
             if(!compareActualAndExpected(actual, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-                visitMRepository.save(ms.convertVisitToMvisit(actual));
+                visitMRepository.save(migrationServices.convertVisitToMvisit(actual));
             }
         }
         System.out.println("No. inconsistencies found: " + inconsistencies);
