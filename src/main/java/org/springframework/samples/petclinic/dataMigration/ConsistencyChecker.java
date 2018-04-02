@@ -68,7 +68,7 @@ public class ConsistencyChecker {
     }
 
     private int checkOwners(){
-        System.out.println("Checking owners");
+        migrationServices.printBanner("Checking for inconsistencies in 'owners'");
         int inconsistencies = 0;
 
         Map<Integer, Owner> actualCollection = ownerRepository.findAll().stream()
@@ -92,7 +92,7 @@ public class ConsistencyChecker {
 
 
     private int checkVet(){
-        System.out.println("Checking vets");
+        migrationServices.printBanner("Checkign for inconsistencies in 'vets'");
 
         int inconsistencies = 0;
         Collection<Vet> vetData = vetRepository.findAll();
@@ -116,7 +116,7 @@ public class ConsistencyChecker {
     }
 
     private int checkPets() {
-        System.out.println("Checking Pets");
+        migrationServices.printBanner("Checking for inconsistencies in 'pets'");
 
         int inconsistencies = 0;
         Collection<Pet> petData = petRepository.findAll();
@@ -144,7 +144,7 @@ public class ConsistencyChecker {
     }
 
     private int checkVisits() {
-        System.out.println("Checking Visits");
+        migrationServices.printBanner("Checking for inconsistencies in 'visits'");
 
         int inconsistencies = 0;
         Collection<Visit> actualCollection = visitRepository.findAll();
@@ -171,6 +171,7 @@ public class ConsistencyChecker {
     private boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
         HashFunction hf = Hashing.md5();
 
+
         System.out.println("actual:" + a.toString());
         System.out.println("migrated:" + m.toString());
 
@@ -182,13 +183,11 @@ public class ConsistencyChecker {
             .putString(m.toString(), Charsets.UTF_8)
             .hash();
 
-        System.out.println(codeOriginal.toString());
-        System.out.println(codeMigrated.toString());
-        System.out.println(a.toString());
-        System.out.println(m.toString());
+        Boolean consistent = codeOriginal.equals(codeMigrated);
+        System.out.println("Consistent? -> "+consistent);
+        System.out.println("\n");
 
-
-        return codeOriginal.equals(codeMigrated);
+        return consistent;
     }
 
 
