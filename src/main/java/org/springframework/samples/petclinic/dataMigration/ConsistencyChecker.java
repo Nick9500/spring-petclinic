@@ -25,6 +25,7 @@ import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import java.util.stream.Collectors;
 public class ConsistencyChecker {
 
     private int numberOfInconsistency = 0;
+    HashFunction hf = Hashing.sha256();
 
     @Autowired
     private OwnerMRepository ownerMRepository;
@@ -61,6 +63,7 @@ public class ConsistencyChecker {
     @Autowired
     private MigrationServices migrationServices;
 
+    @Scheduled(cron = "*/60 * * * * *")
     @Async("threadPoolTaskExecutor")
     public Future<Integer> check(){
         numberOfInconsistency += checkOwners();
@@ -182,9 +185,6 @@ public class ConsistencyChecker {
     }
 
     private boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
-        HashFunction hf = Hashing.md5();
-
-
         System.out.println("actual:" + a.toString());
         System.out.println("migrated:" + m.toString());
 
