@@ -87,6 +87,7 @@ public class ConsistencyChecker {
                 inconsistencies ++;
             }
         }
+        migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
         return inconsistencies;
     }
 
@@ -112,6 +113,8 @@ public class ConsistencyChecker {
                 vetMRepository.save(migrationServices.convertVetToMVet(original));
             }
         }
+
+        migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
         return inconsistencies;
     }
 
@@ -140,6 +143,8 @@ public class ConsistencyChecker {
                 petMRepository.save(newMPet);
             }
         }
+
+        migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
         return inconsistencies;
     }
 
@@ -164,7 +169,9 @@ public class ConsistencyChecker {
                 visitMRepository.save(migrationServices.convertVisitToMvisit(actual));
             }
         }
-        System.out.println("No. inconsistencies found: " + inconsistencies);
+
+        migrationServices.printBanner("No. inconsistencies found in Visits: " + inconsistencies);
+
         return inconsistencies;
     }
 
