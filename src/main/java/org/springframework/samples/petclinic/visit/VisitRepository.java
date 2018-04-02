@@ -15,13 +15,13 @@
  */
 package org.springframework.samples.petclinic.visit;
 
-import java.util.Collection;
-import java.util.List;
-
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.repository.Repository;
 import org.springframework.samples.petclinic.model.BaseEntity;
-import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Repository class for <code>Visit</code> domain objects All method names are compliant with Spring Data naming
@@ -43,6 +43,9 @@ public interface VisitRepository extends Repository<Visit, Integer> {
      * @see BaseEntity#isNew
      */
     void save(Visit visit) throws DataAccessException;
+
+    @Transactional(readOnly = true)
+    Visit findById(Integer id);
 
     List<Visit> findByPetId(Integer petId);
 

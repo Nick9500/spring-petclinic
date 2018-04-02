@@ -208,9 +208,23 @@ public class ConsistencyChecker {
         return consistent;
     }
 
-    public boolean shadowWriteOwnerConsistencyCheck(Owner owner){
+    public boolean shadowWriteConsistencyCheck(Owner owner){
         Owner actual = ownerRepository.findById(owner.getId());
         MOwner expected = ownerMRepository.findById(owner.getId().toString()).get();
+
+        return compareActualAndExpected(actual, expected);
+    }
+
+    public boolean shadowWriteConsitencyCheck(Pet pet){
+        Pet actual = petRepository.findById(pet.getId());
+        MPet expected = petMRepository.findById(pet.getId().toString()).get();
+
+        return compareActualAndExpected(actual, expected);
+    }
+
+    public boolean shadowWriteConsitencyCheck(Visit visit){
+        Visit actual = visitRepository.findById(visit.getId());
+        MVisit expected = visitMRepository.findById(visit.getId().toString()).get();
 
         return compareActualAndExpected(actual, expected);
     }

@@ -8,7 +8,6 @@ import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMReposito
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.owner.PetRepository;
-import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,7 @@ import javax.validation.Valid;
 public class ShadowWrites {
     @Autowired
     private OwnerMRepository ownerMRepository;
-    
+
     @Autowired
     private PetRepository petRepository;
 
@@ -39,37 +38,27 @@ public class ShadowWrites {
 
     @Async("ShadowWriteThread")
     public void save(@Valid Owner owner) {
-        migrationServices.printBanner("Shadow writing with thread: "+Thread.currentThread().getName());
+        migrationServices.printBanner("Shadow writing owner with thread: "+Thread.currentThread().getName());
         ownerMRepository.save(migrationServices.convertOwnerToMOwner(owner));
-        cc.shadowWriteOwnerConsistencyCheck(owner);
+        cc.shadowWriteConsistencyCheck(owner);
     }
 
     @Async("ShadowWriteThread")
     public void save(@Valid Pet pet) {
-        migrationServices.printBanner("Shadow writing with thread: "+Thread.currentThread().getName());
-        System.out.println("Shadow Writing Pets in progress");
+        migrationServices.printBanner("Shadow writing pet with thread: "+Thread.currentThread().getName());
+
         MPet mpet = migrationServices.convertPetToMPet(pet);
         mpet.setId(String.valueOf(petRepository.findLastId()+1));
         mpet.setOwner(migrationServices.convertOwnerToMOwner(pet.getOwner()));
+
         petMRepository.save(mpet);
-
-        if (!cc.compareActualAndExpected(pet, mpet)) {
-            System.out.println("ShadowWrite Consistency Check has Failed");
-        }
-        System.out.println("Shadow Write Pets Success");
-    }
-
-    public void save(@Valid Vet vet) {
+        cc.shadowWriteConsitencyCheck(pet);
     }
 
     @Async("ShadowWriteThread")
     public void save(@Valid Visit visit) {
-        migrationServices.printBanner("Shadow writing with thread: " + Thread.currentThread().getName());
-        System.out.println("Shadow Writing Visits in progress");
+        migrationServices.printBanner("Shadow writing visit with thread: " + Thread.currentThread().getName());
         visitMRepository.save(migrationServices.convertVisitToMvisit(visit));
-        if (!cc.compareActualAndExpected(visit, migrationServices.convertVisitToMvisit(visit))) {
-            System.out.println("ShadowWrite Consistency Check has Failed");
-        }
-        System.out.println("Shadow Write Visit Success");
+        cc.shadowWriteConsitencyCheck(visit);
     }
 }
