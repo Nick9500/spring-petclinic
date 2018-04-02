@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.visit;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -78,6 +79,14 @@ public class Visit extends BaseEntity {
 
     public void setPetId(Integer petId) {
         this.petId = petId;
+    }
+
+    @Override
+    public String toString() {
+        Date date = this.getDate();
+        SimpleDateFormat dt = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy");
+        String s = "MVisit{date=" + dt.format(date) + ", description='" + this.getDescription() + "', petId='" + this.petId.toString() + "'}";
+        return s;
     }
 
 }

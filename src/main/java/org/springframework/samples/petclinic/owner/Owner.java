@@ -15,24 +15,14 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotEmpty;
-
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
-import org.springframework.core.style.ToStringCreator;
 import org.springframework.samples.petclinic.model.Person;
+
+import javax.persistence.*;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotEmpty;
+import java.util.*;
 
 /**
  * Simple JavaBean domain object representing an owner.
@@ -42,8 +32,8 @@ import org.springframework.samples.petclinic.model.Person;
  * @author Sam Brannen
  * @author Michael Isvy
  */
-@Entity
-@Table(name = "owners")
+@Entity //SQL
+@Table(name = "owners") //SQL
 public class Owner extends Person {
     @Column(name = "address")
     @NotEmpty
@@ -58,7 +48,7 @@ public class Owner extends Person {
     @Digits(fraction = 0, integer = 10)
     private String telephone;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "owner")
     private Set<Pet> pets;
 
     public String getAddress() {
@@ -142,11 +132,12 @@ public class Owner extends Person {
 
     @Override
     public String toString() {
-        return new ToStringCreator(this)
-
-                .append("id", this.getId()).append("new", this.isNew())
-                .append("lastName", this.getLastName())
-                .append("firstName", this.getFirstName()).append("address", this.address)
-                .append("city", this.city).append("telephone", this.telephone).toString();
+        return new StringBuilder()
+                .append("id:"+this.getId())
+                .append("lastName:"+ this.getLastName())
+                .append("firstName:"+this.getFirstName())
+                .append("address:"+this.address)
+                .append("city:"+this.city)
+                .append("telephone:"+this.telephone).toString();
     }
 }

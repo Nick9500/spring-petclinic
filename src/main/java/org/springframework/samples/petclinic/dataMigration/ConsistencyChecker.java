@@ -1,0 +1,196 @@
+package org.springframework.samples.petclinic.dataMigration;
+
+import com.google.common.base.Charsets;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.HashFunction;
+import com.google.common.hash.Hashing;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.dataMigration.model.MBaseEntity;
+import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
+import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
+import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
+import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
+import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
+import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
+import org.springframework.samples.petclinic.model.BaseEntity;
+import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.owner.Pet;
+import org.springframework.samples.petclinic.owner.PetRepository;
+import org.springframework.samples.petclinic.vet.Vet;
+import org.springframework.samples.petclinic.vet.VetRepository;
+import org.springframework.samples.petclinic.visit.Visit;
+import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Component
+public class ConsistencyChecker {
+
+    private int numberOfInconsistency = 0;
+    private MigrationServices ms;
+
+    @Autowired
+    private OwnerMRepository ownerMRepository;
+    @Autowired
+    private OwnerRepository ownerRepository;
+
+    @Autowired
+    private VetRepository vetRepository;
+    @Autowired
+    private VetMRepository vetMRepository;
+
+    @Autowired
+    private PetRepository petRepository;
+    @Autowired
+    private PetMRepository petMRepository;
+
+    @Autowired
+    private VisitRepository visitRepository;
+    @Autowired
+    private VisitMRepository visitMRepository;
+
+    @Autowired
+    private MigrationServices migrationServices;
+
+    public int check(){
+        ms = new MigrationServices();
+        checkOwners();
+        checkVet();
+        checkPets();
+        checkVisits();
+        return 0;
+    }
+
+    private int checkOwners(){
+        System.out.println("Checking owners");
+        int inconsistencies = 0;
+
+        Map<Integer, Owner> actualCollection = ownerRepository.findAll().stream()
+            .collect(Collectors.toMap(owner -> owner.getId(), owner -> owner));
+
+        Map<String, MOwner> expectedCollections = ownerMRepository.findAll().stream()
+            .collect(Collectors.toMap(owner -> owner.getId(), owner -> owner));
+
+
+        for(Integer x : actualCollection.keySet()){
+            Owner actual = actualCollection.get(x);
+            MOwner migrated = expectedCollections.get(x.toString());
+
+            if(!compareActualAndExpected(actual, migrated)){
+                //inconsistencies
+                inconsistencies ++;
+            }
+        }
+        return inconsistencies;
+    }
+
+
+    private int checkVet(){
+        System.out.println("Checking vets");
+
+        int inconsistencies = 0;
+        Collection<Vet> vetData = vetRepository.findAll();
+        Collection<MVet> mVetData = vetMRepository.findAll();
+
+        ArrayList<Vet> vets = new ArrayList<>(vetData);
+        ArrayList<MVet> mVets = new ArrayList<>(mVetData);
+
+        for(int i=0; i<vets.size(); i++){
+
+            Vet original = vets.get(i);
+            MVet migrated = mVets.get(i);
+
+            if(!compareActualAndExpected(original, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                vetMRepository.save(ms.convertVetToMVet(original));
+            }
+        }
+        return inconsistencies;
+    }
+
+    private int checkPets() {
+        System.out.println("Checking Pets");
+
+        int inconsistencies = 0;
+        Collection<Pet> petData = petRepository.findAll();
+        Collection<MPet> mPetData = petMRepository.findAll();
+
+        ArrayList<Pet> pets = new ArrayList<>(petData);
+        ArrayList<MPet> mPets = new ArrayList<>(mPetData);
+
+        for(int i=0; i<pets.size(); i++){
+
+            Pet original = pets.get(i);
+            MPet migrated = mPets.get(i);
+
+            if(!compareActualAndExpected(original, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                MPet newMPet = ms.convertPetToMPet(original);
+                // setting the owner isn't done in convertPetToMPet, so do it outside of method call
+                MOwner mOwner = ms.convertOwnerToMOwner(original.getOwner());
+                newMPet.setOwner(mOwner);
+                petMRepository.save(newMPet);
+            }
+        }
+        return inconsistencies;
+    }
+
+    private int checkVisits() {
+        System.out.println("Checking Visits");
+
+        int inconsistencies = 0;
+        Collection<Visit> actualCollection = visitRepository.findAll();
+        Collection<MVisit> expectedCollection = visitMRepository.findAll();
+
+        ArrayList<Visit> visits = new ArrayList<>(actualCollection);
+        ArrayList<MVisit> mVisits = new ArrayList<>(expectedCollection);
+
+        for (int i=0; i<visits.size(); i++){
+
+            Visit actual = visits.get(i);
+            MVisit migrated = mVisits.get(i);
+
+            if(!compareActualAndExpected(actual, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                visitMRepository.save(ms.convertVisitToMvisit(actual));
+            }
+        }
+        System.out.println("No. inconsistencies found: " + inconsistencies);
+        return inconsistencies;
+    }
+
+    private boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
+        HashFunction hf = Hashing.md5();
+
+        System.out.println("actual:" + a.toString());
+        System.out.println("migrated:" + m.toString());
+
+        HashCode codeOriginal = hf.newHasher()
+            .putString(a.toString(), Charsets.UTF_8)
+            .hash();
+
+        HashCode codeMigrated = hf.newHasher()
+            .putString(m.toString(), Charsets.UTF_8)
+            .hash();
+
+        System.out.println(codeOriginal.toString());
+        System.out.println(codeMigrated.toString());
+        System.out.println(a.toString());
+        System.out.println(m.toString());
+
+
+        return codeOriginal.equals(codeMigrated);
+    }
+
+
+}
