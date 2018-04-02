@@ -76,7 +76,7 @@ public class ConsistencyChecker {
 	    	migrationServices.printBanner("No. inconsistencies found in total: " + numberOfInconsistency);
     	}
     }
-    
+
     public static void setFlag() {
     	flag = true;
     }
@@ -191,7 +191,10 @@ public class ConsistencyChecker {
         return inconsistencies;
     }
 
-    private boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
+    public boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
+        HashFunction hf = Hashing.md5();
+
+
         System.out.println("actual:" + a.toString());
         System.out.println("migrated:" + m.toString());
 
