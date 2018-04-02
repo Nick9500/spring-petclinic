@@ -46,6 +46,10 @@ public interface PetRepository extends Repository<Pet, Integer> {
     @Transactional(readOnly = true)
     List<PetType> findPetTypes();
 
+    @Query("Select MAX(id) from Pet")
+    @Transactional(readOnly = true)
+    int findLastId();
+
     /**
      * Retrieve a {@link Pet} from the data store by id.
      * @param id the id to search for

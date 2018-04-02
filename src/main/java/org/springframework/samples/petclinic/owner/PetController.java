@@ -16,6 +16,11 @@
 package org.springframework.samples.petclinic.owner;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.dataMigration.MigrationServices;
+import org.springframework.samples.petclinic.dataMigration.ShadowOps;
+import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
+import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
@@ -38,6 +43,10 @@ class PetController {
     private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
     private final PetRepository pets;
     private final OwnerRepository owners;
+    @Autowired
+    public MigrationServices ms;
+    @Autowired
+    public ShadowOps shadowOps;
 
     @Autowired
     public PetController(PetRepository pets, OwnerRepository owners) {
@@ -79,11 +88,17 @@ class PetController {
             result.rejectValue("name", "duplicate", "already exists");
         }
         owner.addPet(pet);
+
+        MPet mpet = ms.convertPetToMPet(pet);
+        mpet.setId(String.valueOf(pets.findLastId()+1));
+        mpet.setOwner(ms.convertOwnerToMOwner(pet.getOwner()));
+
         if (result.hasErrors()) {
             model.put("pet", pet);
             return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
         } else {
-            this.pets.save(pet);
+//            this.pets.save(pet);
+            shadowOps.shadowWritePets(pet, mpet);
             return "redirect:/owners/{ownerId}";
         }
     }

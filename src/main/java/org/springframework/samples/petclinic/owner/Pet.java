@@ -15,6 +15,7 @@
  */
 package org.springframework.samples.petclinic.owner;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -116,9 +117,10 @@ public class Pet extends NamedEntity {
 
     @Override
     public String toString() {
+        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd");
         return
             "name=" + this.getName() +
-                ", birthDate=" + birthDate +
+                ", birthDate=" + dt.format(birthDate) +
                 ", type=" + type +
                 ", owner=" + owner;
     }

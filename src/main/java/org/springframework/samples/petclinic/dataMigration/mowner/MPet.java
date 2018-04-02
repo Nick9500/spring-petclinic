@@ -23,16 +23,7 @@ public class MPet extends MNamedEntity {
     private Set<MVisit> visits = new LinkedHashSet<>();
 
     public void setBirthDate(Date birthDate) {
-        try{
-            String date = birthDate.toString();
-            System.out.println(date);
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date formatDate = format.parse(date);
-            this.birthDate = formatDate;
-        }
-        catch(ParseException e){
-            System.out.println("Exception found");
-        }
+        this.birthDate = birthDate;
     }
 
     public Date getBirthDate() {
