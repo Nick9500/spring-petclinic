@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
-import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.Pet;
@@ -20,10 +19,7 @@ import javax.validation.Valid;
 public class ShadowWrites {
     @Autowired
     private OwnerMRepository ownerMRepository;
-
-    @Autowired
-    private VetMRepository vetMRepository;
-
+    
     @Autowired
     private PetRepository petRepository;
 
