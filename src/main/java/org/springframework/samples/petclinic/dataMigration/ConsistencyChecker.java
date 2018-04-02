@@ -64,8 +64,9 @@ public class ConsistencyChecker {
     private MigrationServices migrationServices;
 
     @Scheduled(cron = "*/60 * * * * *")
-    @Async("threadPoolTaskExecutor")
+    @Async("ConsistencyCheckerThread")
     public Future<Integer> check(){
+        System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
         numberOfInconsistency += checkOwners();
         numberOfInconsistency += checkVet();
         numberOfInconsistency += checkPets();
