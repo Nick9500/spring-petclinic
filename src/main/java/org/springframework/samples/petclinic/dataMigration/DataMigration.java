@@ -1,7 +1,6 @@
 package org.springframework.samples.petclinic.dataMigration;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.dataMigration.forklift.ForkLift;
 import org.springframework.stereotype.Component;
 
 @Component

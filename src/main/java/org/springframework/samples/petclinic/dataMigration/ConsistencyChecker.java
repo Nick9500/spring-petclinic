@@ -5,7 +5,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.samples.petclinic.dataMigration.forklift.ForkLift;
 import org.springframework.samples.petclinic.dataMigration.model.MBaseEntity;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
@@ -52,6 +51,9 @@ public class ConsistencyChecker {
     @Autowired
     private VisitMRepository visitMRepository;
 
+    @Autowired
+    private MigrationServices migrationServices;
+
     public int check(){
         checkOwners();
         checkVet();
@@ -95,7 +97,7 @@ public class ConsistencyChecker {
         HashFunction hf = Hashing.md5();
 
         for(int i=0; i<vets.size(); i++){
-            MVet original = ForkLift.convertVetToMVet(vets.get(i));
+            MVet original = migrationServices.convertVetToMVet(vets.get(i));
             MVet migrated = mVets.get(i);
 
             HashCode codeOriginal = hf.newHasher()
