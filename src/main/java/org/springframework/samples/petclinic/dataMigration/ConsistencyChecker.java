@@ -136,29 +136,29 @@ public class ConsistencyChecker {
         migrationServices.printBanner("Checking for inconsistencies in 'pets'");
 
         int inconsistencies = 0;
-        Collection<Pet> petData = petRepository.findAll();
-        Collection<MPet> mPetData = petMRepository.findAll();
+        Map<Integer, Pet> actualCollection = petRepository.findAll().stream()
+            .collect(Collectors.toMap(pet -> pet.getId(), pet -> pet));
 
-        ArrayList<Pet> pets = new ArrayList<>(petData);
-        ArrayList<MPet> mPets = new ArrayList<>(mPetData);
+        Map<String, MPet> expectedCollections = petMRepository.findAll().stream()
+            .collect(Collectors.toMap(pet -> pet.getId(), pet -> pet));
 
-        for(int i=0; i<pets.size(); i++){
 
-            Pet original = pets.get(i);
-            MPet migrated = mPets.get(i);
+        for(Integer x : actualCollection.keySet()){
+            Pet actual = actualCollection.get(x);
+            MPet migrated = expectedCollections.get(x.toString());
 
-            if(!compareActualAndExpected(original, migrated)){
+            if(!compareActualAndExpected(actual, migrated)){
+                //inconsistencies
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-                MPet newMPet = migrationServices.convertPetToMPet(original);
+                MPet newMPet = migrationServices.convertPetToMPet(actual);
                 // setting the owner isn't done in convertPetToMPet, so do it outside of method call
-                MOwner mOwner = migrationServices.convertOwnerToMOwner(original.getOwner());
+                MOwner mOwner = migrationServices.convertOwnerToMOwner( actual.getOwner());
                 newMPet.setOwner(mOwner);
                 petMRepository.save(newMPet);
             }
         }
-
-        migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
+        migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
         return inconsistencies;
     }
 
@@ -223,11 +223,12 @@ public class ConsistencyChecker {
     }
 
     public boolean shadowWriteConsistencyCheck(Visit visit){
-        Visit actual = visitRepository.findById(visit.getId());
-        MVisit expected = visitMRepository.findById(visit.getId().toString()).get();
+        Pet actual = petRepository.findById(visit.getId());
+        MPet expected = petMRepository.findById(visit.getId().toString()).get();
 
         return compareActualAndExpected(actual, expected);
     }
+
 
 
 }
