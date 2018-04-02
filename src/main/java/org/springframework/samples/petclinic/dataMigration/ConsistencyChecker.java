@@ -146,28 +146,34 @@ public class ConsistencyChecker {
 
     private int checkVisits() {
         System.out.println("Checking Visits");
-        int inconsistencies = 0;
 
+        int inconsistencies = 0;
         Collection<Visit> actualCollection = visitRepository.findAll();
         Collection<MVisit> expectedCollection = visitMRepository.findAll();
 
         ArrayList<Visit> visits = new ArrayList<>(actualCollection);
         ArrayList<MVisit> mVisits = new ArrayList<>(expectedCollection);
 
-        for (int i=0; i<actualCollection.size();i++){
+        for (int i=0; i<visits.size(); i++){
+
             Visit actual = visits.get(i);
             MVisit migrated = mVisits.get(i);
+
             if(!compareActualAndExpected(actual, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 visitMRepository.save(ms.convertVisitToMvisit(actual));
             }
         }
+        System.out.println("No. inconsistencies found: " + inconsistencies);
         return inconsistencies;
     }
 
     private boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
         HashFunction hf = Hashing.md5();
+
+        System.out.println("actual:" + a.toString());
+        System.out.println("migrated:" + m.toString());
 
         HashCode codeOriginal = hf.newHasher()
             .putString(a.toString(), Charsets.UTF_8)
