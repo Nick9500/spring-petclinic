@@ -8,7 +8,7 @@ import java.util.Date;
 /**
  * Created by ericxiao on 2018-04-01.
  */
-@Document(collection = "visit")
+@Document(collection = "visits")
 public class MVisit extends MBaseEntity {
 
     private Date date;
