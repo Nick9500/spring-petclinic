@@ -46,9 +46,6 @@ public class ShadowWrites {
 
     }
 
-    public void save(@Valid Vet vet) {
-    }
-
     public void save(@Valid Visit visit) {
     }
 
