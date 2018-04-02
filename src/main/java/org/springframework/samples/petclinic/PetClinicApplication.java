@@ -21,6 +21,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.samples.petclinic.dataMigration.DataMigration;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * PetClinic Spring Boot Application.
@@ -29,6 +30,7 @@ import org.springframework.samples.petclinic.dataMigration.DataMigration;
  *
  */
 @SpringBootApplication
+@EnableAsync
 public class PetClinicApplication implements CommandLineRunner{
 
     @Autowired

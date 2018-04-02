@@ -23,11 +23,14 @@ import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 @Component
@@ -58,13 +61,14 @@ public class ConsistencyChecker {
     @Autowired
     private MigrationServices migrationServices;
 
-    public int check(){
+    @Async("threadPoolTaskExecutor")
+    public Future<Integer> check(){
         numberOfInconsistency += checkOwners();
         numberOfInconsistency += checkVet();
         numberOfInconsistency += checkPets();
         numberOfInconsistency += checkVisits();
 
-        return numberOfInconsistency;
+        return new AsyncResult(numberOfInconsistency);
     }
 
     private int checkOwners(){
