@@ -85,6 +85,8 @@ public class ConsistencyChecker {
             if(!compareActualAndExpected(actual, migrated)){
                 //inconsistencies
                 inconsistencies ++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                ownerMRepository.save(migrationServices.convertOwnerToMOwner(actual));
             }
         }
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
