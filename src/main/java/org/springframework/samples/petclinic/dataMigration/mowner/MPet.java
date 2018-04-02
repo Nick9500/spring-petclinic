@@ -3,7 +3,6 @@ package org.springframework.samples.petclinic.dataMigration.mowner;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.dataMigration.model.MNamedEntity;
 import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.owner.PetType;
@@ -24,7 +23,16 @@ public class MPet extends MNamedEntity {
     private Set<MVisit> visits = new LinkedHashSet<>();
 
     public void setBirthDate(Date birthDate) {
-        this.birthDate = birthDate;
+        try{
+            String date = birthDate.toString();
+            System.out.println(date);
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            Date formatDate = format.parse(date);
+            this.birthDate = formatDate;
+        }
+        catch(ParseException e){
+            System.out.println("Exception found");
+        }
     }
 
     public Date getBirthDate() {
