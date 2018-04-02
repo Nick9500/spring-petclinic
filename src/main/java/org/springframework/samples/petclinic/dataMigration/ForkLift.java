@@ -122,7 +122,7 @@ public class ForkLift {
 
         Collection<Specialty> specialtyData = new Vet().getSpecialties();
 
-        migrationServices.printBanner("Finished forklifting 'pets'");
+        migrationServices.printBanner("Finished forklifting 'vets'");
 
     }
 
