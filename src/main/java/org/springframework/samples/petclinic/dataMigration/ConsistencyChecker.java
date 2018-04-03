@@ -93,9 +93,9 @@ public class ConsistencyChecker {
     }
     public double returnCCPercentage(){
         double totalRows = consistencyCheckPercentage.get("total rows");
-        System.out.println("Total number of rows is : " + totalRows);
+        System.out.println("FINAL Total number of rows is : " + totalRows);
         double consistentRows = consistencyCheckPercentage.get("consistent rows");
-        System.out.println("Total number of consistent rows is : " + consistentRows);
+        System.out.println("FINAL Total number of consistent rows is : " + consistentRows);
 
         if(totalRows > 0){
             consistencyPercentage = ( consistentRows / totalRows ) * 100;
@@ -173,8 +173,8 @@ public class ConsistencyChecker {
         }
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
 //        return inconsistencies;
-        System.out.println("TOTAL CONSIS NO OF ROWS " + consistencyCheckPercentage.get("consistent rows"));
         System.out.println("TOTAL NO OF ROWS " + consistencyCheckPercentage.get("total rows"));
+        System.out.println("TOTAL CONSIS NO OF ROWS " + consistencyCheckPercentage.get("consistent rows"));
     }
 
 
@@ -205,6 +205,8 @@ public class ConsistencyChecker {
 
         migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
 //        return inconsistencies;
+        System.out.println("TOTAL NO OF ROWS " + consistencyCheckPercentage.get("total rows"));
+        System.out.println("TOTAL CONSIS NO OF ROWS " + consistencyCheckPercentage.get("consistent rows"));
     }
 
 
@@ -239,6 +241,8 @@ public class ConsistencyChecker {
         }
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
 //        return inconsistencies;
+        System.out.println("TOTAL NO OF ROWS " + consistencyCheckPercentage.get("total rows"));
+        System.out.println("TOTAL CONSIS NO OF ROWS " + consistencyCheckPercentage.get("consistent rows"));
     }
 
     private void checkVisits() {
@@ -269,6 +273,8 @@ public class ConsistencyChecker {
 
         migrationServices.printBanner("No. inconsistencies found in Visits: " + inconsistencies);
 //        return inconsistencies;
+        System.out.println("TOTAL NO OF ROWS " + consistencyCheckPercentage.get("total rows"));
+        System.out.println("TOTAL CONSIS NO OF ROWS " + consistencyCheckPercentage.get("consistent rows"));
     }
 
     public boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
@@ -298,6 +304,7 @@ public class ConsistencyChecker {
         if(compareActualAndExpected(actual, expected)){
             shadowWriteCCPercentage.put("consistent rows", consistentShadowWriteRows++);
         }
+        returnShadowWritePercentage();
         return compareActualAndExpected(actual, expected);
     }
 
@@ -309,6 +316,7 @@ public class ConsistencyChecker {
         if(compareActualAndExpected(actual, expected)){
             shadowWriteCCPercentage.put("consistent rows", consistentShadowWriteRows++);
         }
+        returnShadowWritePercentage();
         return compareActualAndExpected(actual, expected);
     }
 
@@ -320,6 +328,7 @@ public class ConsistencyChecker {
         if(compareActualAndExpected(actual, expected)){
             shadowWriteCCPercentage.put("consistent rows", consistentShadowWriteRows++);
         }
+        returnShadowWritePercentage();
         return compareActualAndExpected(actual, expected);
     }
 
@@ -336,10 +345,11 @@ public class ConsistencyChecker {
             visitMRepository.save(migrationServices.convertVisitToMvisit(original));
         }
         else{
-            shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
+            shadowReadCCPercentage.put("consistent rows", consistentShadowReadRows++);
         }
 
         migrationServices.printBanner("No. inconsistencies found in visits: " + inconsistencies);
+        returnShadowReadPercentage();
         return inconsistencies;
     }
 
@@ -362,11 +372,12 @@ public class ConsistencyChecker {
                 vetMRepository.save(migrationServices.convertVetToMVet(original));
             }
             else{
-                shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
+                shadowReadCCPercentage.put("consistent rows", consistentShadowReadRows++);
             }
         }
 
         migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
+        returnShadowReadPercentage();
         return inconsistencies;
     }
 
@@ -382,10 +393,11 @@ public class ConsistencyChecker {
             petMRepository.save(migrationServices.convertPetToMPet(original));
     	}
         else{
-            shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
+            shadowReadCCPercentage.put("consistent rows", consistentShadowReadRows++);
         }
         migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
-    	return inconsistencies;
+        returnShadowReadPercentage();
+        return inconsistencies;
     }
 
     public int shadowReadConsistencyCheck(Owner original, MOwner migrated) {
@@ -400,10 +412,11 @@ public class ConsistencyChecker {
             ownerMRepository.save(migrationServices.convertOwnerToMOwner(original));
         }
         else{
-            shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
+            shadowReadCCPercentage.put("consistent rows", consistentShadowReadRows++);
         }
 
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
+        returnShadowReadPercentage();
         return inconsistencies;
     }
 
