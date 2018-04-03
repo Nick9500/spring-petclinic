@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -47,7 +48,9 @@ class VetController {
         // Here we are returning an object of type 'Vets' rather than a collection of Vet
         // objects so it is simpler for Object-Xml mapping
         Vets vets = new Vets();
-        vets.getVetList().addAll(this.sr.vetFindAll());
+        Collection<Vet> allVets = this.vets.findAll();
+        this.sr.findAllVets(allVets);
+        vets.getVetList().addAll(allVets);
         model.put("vets", vets);
         return "vets/vetList";
     }
@@ -57,7 +60,9 @@ class VetController {
         // Here we are returning an object of type 'Vets' rather than a collection of Vet
         // objects so it is simpler for JSon/Object mapping
         Vets vets = new Vets();
-        vets.getVetList().addAll(this.sr.vetFindAll());
+        Collection<Vet> allVets = this.vets.findAll();
+        this.sr.findAllVets(allVets);
+        vets.getVetList().addAll(allVets);
         return vets;
     }
 

@@ -17,27 +17,22 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ShadowReads {
 
     @Autowired
-    private OwnerRepository ownerRepository;
-    @Autowired
     private OwnerMRepository ownerMRepository;
 
-    @Autowired
-    private VetRepository vetRepository;
     @Autowired
     private VetMRepository vetMRepository;
 
     @Autowired
-    private PetRepository petRepository;
-    @Autowired
     private PetMRepository petMRepository;
 
-    @Autowired
-    private VisitRepository visitRepository;
     @Autowired
     private VisitMRepository visitMRepository;
 
@@ -47,32 +42,8 @@ public class ShadowReads {
     @Autowired
     private ConsistencyChecker consistencyChecker;
 
-    // shadow read for owner method findById
-    public void OwnerFindById(Integer id,  String Mid){
-        Owner original = ownerRepository.findById(id);
-        MOwner migrated = ownerMRepository.findById(Mid).get();
-         if(!(consistencyChecker.compareActualAndExpected(original, migrated))){
-             System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
-             ownerMRepository.save(migrationServices.convertOwnerToMOwner(original));
-         }
-    }
-
-    // shadow read for owner method finalAll
-    public void OwnerFindAll(){
-        Collection<Owner> original = ownerRepository.findAll();
-        Collection<MOwner> migrated = ownerMRepository.findAll();
-
-    }
-
-
-    public Collection<Vet> vetFindAll(){
-        Collection<Vet> original = vetRepository.findAll();
-        vetFindAllShadow(original);
-        return original;
-    }
-
     @Async("ShadowReadThread")
-    public void vetFindAllShadow(Collection<Vet> original){
+    public void findAllVets(Collection<Vet> original){
         Collection<MVet> migrated = vetMRepository.findAll();
         consistencyChecker.shadowReadConsistencyCheck(original, migrated);
     }
@@ -81,8 +52,26 @@ public class ShadowReads {
 
     }
 
-    public void VisitFindAll(){
+    @Async("ShadowReadThread")
+    public void findOwnerByLastName(Collection<Owner> actualResults, String lastName){
+        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Owner By Last Name: "+lastName);
+        Map<Integer, Owner> actual = actualResults.stream().collect(Collectors.toMap(owner -> owner.getId(), owner -> owner));
+        List<MOwner> expectedResults = ownerMRepository.findByLastName(lastName);
 
+        for(MOwner mowner : expectedResults){
+            try{
+                Owner owner = actual.get(Integer.parseInt(mowner.getId()));
+                if(!consistencyChecker.compareActualAndExpected(owner, mowner)){
+                    //inconsistent
+                    System.out.printf("Inconsistent read from Mongo... fixing inconsistency");
+                    ownerMRepository.deleteById(mowner.getId());
+                    ownerMRepository.save(migrationServices.convertOwnerToMOwner(owner));
+                }
+            }catch(NullPointerException e){
+                // extra data in the new db
+                System.out.println("Inconsistency found: extra data in Mongodb... Now deleting the extra data");
+                ownerMRepository.deleteById(mowner.getId());
+            }
+        }
     }
-
 }

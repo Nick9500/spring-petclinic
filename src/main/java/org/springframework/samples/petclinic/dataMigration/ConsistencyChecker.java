@@ -229,7 +229,7 @@ public class ConsistencyChecker {
         return compareActualAndExpected(actual, expected);
     }
 
-    public Collection<Vet> shadowReadConsistencyCheck(Collection<Vet> vetData, Collection<MVet> mVetData){
+    public int shadowReadConsistencyCheck(Collection<Vet> vetData, Collection<MVet> mVetData){
         migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
 
         int inconsistencies = 0;
@@ -248,7 +248,7 @@ public class ConsistencyChecker {
         }
 
         migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
-        return vetData;
+        return inconsistencies;
     }
 
 }
