@@ -17,6 +17,7 @@ package org.springframework.samples.petclinic.owner;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.MigrationServices;
+import org.springframework.samples.petclinic.dataMigration.ShadowReads;
 import org.springframework.samples.petclinic.dataMigration.ShadowWrites;
 import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
 import org.springframework.stereotype.Controller;
@@ -42,15 +43,18 @@ class PetController {
     private final PetRepository pets;
     private final OwnerRepository owners;
     private final ShadowWrites shadowWrites;
+    private final ShadowReads shadowReads;
+
     @Autowired
     public MigrationServices ms;
 
 
     @Autowired
-    public PetController(PetRepository pets, OwnerRepository owners, ShadowWrites shadowWrites) {
+    public PetController(PetRepository pets, OwnerRepository owners, ShadowWrites shadowWrites, ShadowReads shadowReads) {
         this.pets = pets;
         this.owners = owners;
         this.shadowWrites = shadowWrites;
+        this.shadowReads = shadowReads;
     }
 
     @ModelAttribute("types")
@@ -101,6 +105,7 @@ class PetController {
     @GetMapping("/pets/{petId}/edit")
     public String initUpdateForm(@PathVariable("petId") int petId, ModelMap model) {
         Pet pet = this.pets.findById(petId);
+        shadowReads.findPetByID(pet, Integer.toString(petId));
         model.put("pet", pet);
         return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
     }
