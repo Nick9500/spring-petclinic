@@ -15,10 +15,7 @@ import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.model.BaseEntity;
-import org.springframework.samples.petclinic.owner.Owner;
-import org.springframework.samples.petclinic.owner.OwnerRepository;
-import org.springframework.samples.petclinic.owner.Pet;
-import org.springframework.samples.petclinic.owner.PetRepository;
+import org.springframework.samples.petclinic.owner.*;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
@@ -29,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -227,6 +225,33 @@ public class ConsistencyChecker {
         MPet expected = petMRepository.findById(visit.getId().toString()).get();
 
         return compareActualAndExpected(actual, expected);
+    }
+
+    public int shadowReadConsistencyCheck(Collection<Pet> petData, Collection<MPet> mPetData){
+        migrationServices.printBanner("Shadow Read consistency checking for pet's findPetTypes()");
+
+        int inconsistencies = 0;
+        ArrayList<Pet> pets = new ArrayList<>(petData);
+        ArrayList<MPet> mPets = new ArrayList<>(mPetData);
+
+        List<PetType> petTypes = petRepository.findPetTypes();
+        List<PetType> mPetTypes = petMRepository.findPetTypes();
+
+        for(int i=0; i<pets.size(); i++){
+            Pet original = pets.get(i);
+            MPet migrated = mPets.get(i);
+
+            PetType originalType = petTypes.get(i);
+            PetType migratedType = mPetTypes.get(i);
+            if(!originalType.equals(migratedType)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                petMRepository.deleteById(migrated.getId());
+                petMRepository.save(migrationServices.convertPetToMPet(original));
+            }
+        }
+        migrationServices.printBanner("No. inconsistencies found in pet types: " + inconsistencies);
+        return inconsistencies;
     }
 
 
