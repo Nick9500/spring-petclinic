@@ -31,11 +31,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.HashMap;
 
 @Component
 public class ConsistencyChecker {
 
-    private int numberOfInconsistency = 0;
+    private double consistencyPercentage = 0;
     HashFunction hf = Hashing.sha256();
     private static boolean doneForklifting = false;
 
@@ -62,25 +63,49 @@ public class ConsistencyChecker {
     @Autowired
     private MigrationServices migrationServices;
 
+
+    public HashMap<String, Double> consistencyCheckPercentage = new HashMap<>();
+    public double totalCCRows = 0;
+    public double consistentCCRows = 0;
+
+    public HashMap<String, Double> shadowWriteCCPercentage = new HashMap<>();
+    public double totalShadowWriteRows = 0;
+    public double consistentShadowWriteRows = 0;
+
+    public HashMap<String, Double> shadowReadCCPercentage = new HashMap<>();
+    public double totalShadowReadRows = 0;
+    public double consistentShadowReadRows = 0;
+
     @Scheduled(cron = "*/60 * * * * *")
     @Async("ConsistencyCheckerThread")
     public void check(){
-    	if(doneForklifting) {
-	        System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
-	        numberOfInconsistency += checkOwners();
-	        numberOfInconsistency += checkVet();
-	        numberOfInconsistency += checkPets();
-	        numberOfInconsistency += checkVisits();
-	    	migrationServices.printBanner("No. inconsistencies found in total: " + numberOfInconsistency);
-    	}
+        if(doneForklifting) {
+            System.out.println("Asynchronous consistency Thread: " + Thread.currentThread().getName());
+            checkOwners();
+            checkVet();
+            checkPets();
+            checkVisits();
+
+            double totalRows = consistencyCheckPercentage.get("total rows");
+            System.out.println("Total number of rows is : " + totalRows);
+            double consistentRows = consistencyCheckPercentage.get("consistent rows");
+            System.out.println("Total number of consistent rows is : " + consistentRows);
+
+
+            consistencyPercentage = ( consistentRows / totalRows ) * 100;
+            migrationServices.printBanner("Consistency check is at %" + consistencyPercentage);
+            consistencyCheckPercentage.remove("total rows");
+            consistencyCheckPercentage.remove("consistent rows");
+        }
     }
 
     public static void enableChecks() {
-    	doneForklifting = true;
+        doneForklifting = true;
     }
 
-    private int checkOwners(){
+    private void checkOwners(){
         migrationServices.printBanner("Checking for inconsistencies in 'owners'");
+
         int inconsistencies = 0;
 
         Map<Integer, Owner> actualCollection = ownerRepository.findAll().stream()
@@ -93,20 +118,25 @@ public class ConsistencyChecker {
         for(Integer x : actualCollection.keySet()){
             Owner actual = actualCollection.get(x);
             MOwner migrated = expectedCollections.get(x.toString());
-
+            consistencyCheckPercentage.put("total rows", totalCCRows++);
             if(!compareActualAndExpected(actual, migrated)){
                 //inconsistencies
                 inconsistencies ++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 ownerMRepository.save(migrationServices.convertOwnerToMOwner(actual));
             }
+            else{
+                consistencyCheckPercentage.put("consistent rows", consistentCCRows++);
+            }
         }
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
-        return inconsistencies;
+//        return inconsistencies;
+        System.out.println("TOTAL CONSIS NO OF ROWS " + consistencyCheckPercentage.get("consistent rows"));
+        System.out.println("TOTAL NO OF ROWS " + consistencyCheckPercentage.get("total rows"));
     }
 
 
-    private int checkVet(){
+    private void checkVet(){
         migrationServices.printBanner("Checking for inconsistencies in 'vets'");
 
         int inconsistencies = 0;
@@ -120,19 +150,23 @@ public class ConsistencyChecker {
 
             Vet original = vets.get(i);
             MVet migrated = mVets.get(i);
-
+            consistencyCheckPercentage.put("total rows", totalCCRows++);
             if(!compareActualAndExpected(original, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 vetMRepository.save(migrationServices.convertVetToMVet(original));
             }
+            else{
+                consistencyCheckPercentage.put("consistent rows", consistentCCRows++);
+            }
         }
 
         migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
-        return inconsistencies;
+//        return inconsistencies;
     }
 
-    private int checkPets() {
+
+    private void checkPets() {
         migrationServices.printBanner("Checking for inconsistencies in 'pets'");
 
         int inconsistencies = 0;
@@ -146,7 +180,7 @@ public class ConsistencyChecker {
         for(Integer x : actualCollection.keySet()){
             Pet actual = actualCollection.get(x);
             MPet migrated = expectedCollections.get(x.toString());
-
+            consistencyCheckPercentage.put("total rows", totalCCRows++);
             if(!compareActualAndExpected(actual, migrated)){
                 //inconsistencies
                 inconsistencies++;
@@ -157,13 +191,17 @@ public class ConsistencyChecker {
                 newMPet.setOwner(mOwner);
                 petMRepository.save(newMPet);
             }
+            else{
+                consistencyCheckPercentage.put("consistent rows", consistentCCRows++);
+            }
         }
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
-        return inconsistencies;
+//        return inconsistencies;
     }
 
-    private int checkVisits() {
+    private void checkVisits() {
         migrationServices.printBanner("Checking for inconsistencies in 'visits'");
+
 
         int inconsistencies = 0;
         Collection<Visit> actualCollection = visitRepository.findAll();
@@ -176,17 +214,19 @@ public class ConsistencyChecker {
 
             Visit actual = visits.get(i);
             MVisit migrated = mVisits.get(i);
-
+            consistencyCheckPercentage.put("total rows", totalCCRows++);
             if(!compareActualAndExpected(actual, migrated)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 visitMRepository.save(migrationServices.convertVisitToMvisit(actual));
             }
+            else{
+                consistencyCheckPercentage.put("consistent rows", consistentCCRows++);
+            }
         }
 
         migrationServices.printBanner("No. inconsistencies found in Visits: " + inconsistencies);
-
-        return inconsistencies;
+//        return inconsistencies;
     }
 
     public boolean compareActualAndExpected(BaseEntity a, MBaseEntity m){
@@ -212,6 +252,10 @@ public class ConsistencyChecker {
         Owner actual = ownerRepository.findById(owner.getId());
         MOwner expected = ownerMRepository.findById(owner.getId().toString()).get();
 
+        shadowWriteCCPercentage.put("total rows", totalShadowWriteRows++);
+        if(compareActualAndExpected(actual, expected)){
+            shadowWriteCCPercentage.put("consistent rows", consistentShadowWriteRows++);
+        }
         return compareActualAndExpected(actual, expected);
     }
 
@@ -219,6 +263,10 @@ public class ConsistencyChecker {
         Pet actual = petRepository.findById(pet.getId());
         MPet expected = petMRepository.findById(pet.getId().toString()).get();
 
+        shadowWriteCCPercentage.put("total rows", totalShadowWriteRows++);
+        if(compareActualAndExpected(actual, expected)){
+            shadowWriteCCPercentage.put("consistent rows", consistentShadowWriteRows++);
+        }
         return compareActualAndExpected(actual, expected);
     }
 
@@ -226,18 +274,27 @@ public class ConsistencyChecker {
         Visit actual = visitRepository.findById(visit.getId());
         MVisit expected = visitMRepository.findById(visit.getId().toString()).get();
 
+        shadowWriteCCPercentage.put("total rows", totalShadowWriteRows++);
+        if(compareActualAndExpected(actual, expected)){
+            shadowWriteCCPercentage.put("consistent rows", consistentShadowWriteRows++);
+        }
         return compareActualAndExpected(actual, expected);
     }
+
 
     public int shadowReadConsistencyCheck(Visit original,  MVisit migrated){
         migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
         int inconsistencies = 0;
+        shadowReadCCPercentage.put("total rows", totalShadowReadRows++);
 
         if (!compareActualAndExpected(original, migrated)){
             inconsistencies++;
             System.out.println("Inconsistency found, insert again");
             visitMRepository.deleteById(migrated.getId());
             visitMRepository.save(migrationServices.convertVisitToMvisit(original));
+        }
+        else{
+            shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
         }
 
         migrationServices.printBanner("No. inconsistencies found in visits: " + inconsistencies);
@@ -253,6 +310,7 @@ public class ConsistencyChecker {
         ArrayList<MVet> mVets = new ArrayList<>(mVetData);
 
         for(int i=0; i<vets.size(); i++){
+            shadowReadCCPercentage.put("total rows", totalShadowReadRows++);
             Vet original = vets.get(i);
             MVet migrated = mVets.get(i);
             if(!compareActualAndExpected(original, migrated)){
@@ -260,6 +318,9 @@ public class ConsistencyChecker {
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
                 vetMRepository.deleteById(migrated.getId());
                 vetMRepository.save(migrationServices.convertVetToMVet(original));
+            }
+            else{
+                shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
             }
         }
 
@@ -271,12 +332,16 @@ public class ConsistencyChecker {
     	migrationServices.printBanner("Shadow Read consistency checking for pet's findById()");
     	int inconsistencies = 0;
 
+        shadowReadCCPercentage.put("total rows", totalShadowReadRows++);
     	if(!compareActualAndExpected(original, migrated)) {
     		inconsistencies++;
             System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
             petMRepository.deleteById(migrated.getId());
             petMRepository.save(migrationServices.convertPetToMPet(original));
     	}
+        else{
+            shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
+        }
         migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
     	return inconsistencies;
     }
@@ -285,11 +350,15 @@ public class ConsistencyChecker {
         migrationServices.printBanner("Shadow Read consistency checking for owner's findById()");
         int inconsistencies = 0;
 
+        shadowReadCCPercentage.put("total rows", totalShadowReadRows++);
         if(!compareActualAndExpected(original, migrated)) {
             inconsistencies++;
             System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
             ownerMRepository.deleteById(migrated.getId());
             ownerMRepository.save(migrationServices.convertOwnerToMOwner(original));
+        }
+        else{
+            shadowReadCCPercentage.put("consistent rows", consistentCCRows++);
         }
 
         migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
