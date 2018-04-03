@@ -124,7 +124,7 @@ public class ConsistencyChecker {
         return shadowWriteConsistentPercentage;
     }
 
-    public double returnShadowReacPercentage(){
+    public double returnShadowReadPercentage(){
         double totalRows = shadowReadCCPercentage.get("total rows");
         System.out.println("SHADOW READ Total number of rows is : " + totalRows);
         double consistentRows = shadowReadCCPercentage.get("consistent rows");
