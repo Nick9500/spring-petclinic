@@ -7,6 +7,7 @@ import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMReposito
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
@@ -14,6 +15,7 @@ import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
+import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
