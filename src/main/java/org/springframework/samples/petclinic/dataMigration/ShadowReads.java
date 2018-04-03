@@ -45,6 +45,7 @@ public class ShadowReads {
                 Owner owner = actual.get(Integer.parseInt(mowner.getId()));
                 if(!consistencyChecker.compareActualAndExpected(owner, mowner)){
                     //inconsistent
+                    System.out.printf("Inconsistent read from Mongo... fixing inconsistency");
                     ownerMRepository.deleteById(mowner.getId());
                     ownerMRepository.save(migrationServices.convertOwnerToMOwner(owner));
                 }
