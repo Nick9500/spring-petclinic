@@ -36,7 +36,10 @@ import java.util.HashMap;
 @Component
 public class ConsistencyChecker {
 
-    private double consistencyPercentage = 0;
+    private double consistencyPercentage = 100.0;
+    private double shadowWriteConsistentPercentage  = 100.0;
+    private double shadowReadConsistentPercentage  = 100.0;
+
     HashFunction hf = Hashing.sha256();
     private static boolean doneForklifting = false;
 
@@ -85,18 +88,57 @@ public class ConsistencyChecker {
             checkVet();
             checkPets();
             checkVisits();
-
-            double totalRows = consistencyCheckPercentage.get("total rows");
-            System.out.println("Total number of rows is : " + totalRows);
-            double consistentRows = consistencyCheckPercentage.get("consistent rows");
-            System.out.println("Total number of consistent rows is : " + consistentRows);
-
-
-            consistencyPercentage = ( consistentRows / totalRows ) * 100;
-            migrationServices.printBanner("Consistency check is at %" + consistencyPercentage);
-            consistencyCheckPercentage.remove("total rows");
-            consistencyCheckPercentage.remove("consistent rows");
+            returnCCPercentage();
         }
+    }
+    public double returnCCPercentage(){
+        double totalRows = consistencyCheckPercentage.get("total rows");
+        System.out.println("Total number of rows is : " + totalRows);
+        double consistentRows = consistencyCheckPercentage.get("consistent rows");
+        System.out.println("Total number of consistent rows is : " + consistentRows);
+
+        if(totalRows > 0){
+            consistencyPercentage = ( consistentRows / totalRows ) * 100;
+        }
+        migrationServices.printBanner("Consistency check is at %" + consistencyPercentage);
+        //reset consistency check
+        totalCCRows = 0;
+        consistentCCRows = 0;
+
+        return consistencyPercentage;
+    }
+
+    public double returnShadowWritePercentage(){
+        double totalRows = shadowWriteCCPercentage.get("total rows");
+        System.out.println("SHADOW WRITE Total number of rows is : " + totalRows);
+        double consistentRows = shadowWriteCCPercentage.get("consistent rows");
+        System.out.println("SHADOW WRITE Total number of consistent rows is : " + consistentRows);
+        if(totalRows > 0){
+            shadowWriteConsistentPercentage = ( consistentRows / totalRows ) * 100;
+        }
+        migrationServices.printBanner("SHADOW WRITE Consistency check is at %" + shadowWriteConsistentPercentage);
+        //reset consistency check
+        totalShadowWriteRows = 0;
+        consistentShadowWriteRows = 0;
+
+        return shadowWriteConsistentPercentage;
+    }
+
+    public double returnShadowReacPercentage(){
+        double totalRows = shadowReadCCPercentage.get("total rows");
+        System.out.println("SHADOW READ Total number of rows is : " + totalRows);
+        double consistentRows = shadowReadCCPercentage.get("consistent rows");
+        System.out.println("SHADOW READ Total number of consistent rows is : " + consistentRows);
+
+        if(totalRows > 0) {
+            shadowReadConsistentPercentage = (consistentRows / totalRows) * 100;
+        }
+        migrationServices.printBanner("SHADOW READ Consistency check is at %" + shadowReadConsistentPercentage);
+        //reset consistency check
+        totalShadowReadRows = 0;
+        consistentShadowReadRows = 0;
+
+        return shadowReadConsistentPercentage;
     }
 
     public static void enableChecks() {
