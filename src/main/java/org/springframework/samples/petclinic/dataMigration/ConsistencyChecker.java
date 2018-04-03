@@ -223,8 +223,8 @@ public class ConsistencyChecker {
     }
 
     public boolean shadowWriteConsistencyCheck(Visit visit){
-        Visit actual = visitRepository.findById(visit.getId());
-        MVisit expected = visitMRepository.findById(visit.getId().toString()).get();
+        Pet actual = petRepository.findById(visit.getId());
+        MPet expected = petMRepository.findById(visit.getId().toString()).get();
 
         return compareActualAndExpected(actual, expected);
     }
