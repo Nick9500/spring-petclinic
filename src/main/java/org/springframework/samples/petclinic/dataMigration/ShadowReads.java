@@ -82,4 +82,11 @@ public class ShadowReads {
             }
         }
     }
+
+    @Async("ShadowReadThread")
+    public void findVisitByID( Visit originalVisit, String visitID ){
+        migrationServices.printBanner("Shadow reading on thread: "+Thread.currentThread().getName()+" for Visit by ID: "+visitID);
+        MVisit migratedVisit = visitMRepository.findById(visitID).get();
+        consistencyChecker.shadowReadConsistencyCheck(originalVisit, migratedVisit);
+    }
 }
