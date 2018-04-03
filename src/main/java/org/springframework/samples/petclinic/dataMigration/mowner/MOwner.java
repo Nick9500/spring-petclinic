@@ -23,6 +23,18 @@ public class MOwner extends MPerson {
 //    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "owner")
     private Set<MPet> pets;
 
+    public MOwner() {
+
+    }
+
+    public MOwner(String firstName, String lastName, String address, String city, String telephone, Set<MPet> pets) {
+        super(firstName,lastName);
+        this.address = address;
+        this.city = city;
+        this.telephone = telephone;
+        this.pets = pets;
+    }
+
     public String getAddress() {
         return this.address;
     }
