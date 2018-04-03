@@ -250,20 +250,35 @@ public class ConsistencyChecker {
         migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
         return inconsistencies;
     }
-    
+
     public int shadowReadConsistencyCheck(Pet original, MPet migrated) {
     	migrationServices.printBanner("Shadow Read consistency checking for pet's findById()");
     	int inconsistencies = 0;
-    	
+
     	if(!compareActualAndExpected(original, migrated)) {
     		inconsistencies++;
             System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
             petMRepository.deleteById(migrated.getId());
             petMRepository.save(migrationServices.convertPetToMPet(original));
     	}
-    	
+
         migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
     	return inconsistencies;
+    }
+
+    public int shadowReadConsistencyCheck(Owner original, MOwner migrated) {
+        migrationServices.printBanner("Shadow Read consistency checking for owner's findById()");
+        int inconsistencies = 0;
+
+        if(!compareActualAndExpected(original, migrated)) {
+            inconsistencies++;
+            System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+            ownerMRepository.deleteById(migrated.getId());
+            ownerMRepository.save(migrationServices.convertOwnerToMOwner(original));
+        }
+
+        migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
+        return inconsistencies;
     }
 
 }
