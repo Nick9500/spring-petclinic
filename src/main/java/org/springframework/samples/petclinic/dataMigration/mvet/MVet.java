@@ -1,8 +1,12 @@
 package org.springframework.samples.petclinic.dataMigration.mvet;
 
+import org.springframework.beans.support.MutableSortDefinition;
+import org.springframework.beans.support.PropertyComparator;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.samples.petclinic.dataMigration.model.MPerson;
+import org.springframework.samples.petclinic.vet.Specialty;
 
+import javax.xml.bind.annotation.XmlElement;
 import java.util.*;
 
 
@@ -19,40 +23,23 @@ public class MVet extends MPerson{
         specialties.add(mSpecialty);
     }
 
+    @XmlElement
+    public List<MSpecialty> getSpecialties() {
+        List<MSpecialty> sortedSpecs = specialties;
+        PropertyComparator.sort(sortedSpecs,
+            new MutableSortDefinition("name", true, false));
+        return Collections.unmodifiableList(sortedSpecs);
+    }
+
+    public int getNrOfSpecialties() {
+        return specialties.size();
+    }
+
+
     @Override
     public String toString() {
         String s = "Id: " + this.getId() + " FirstName: " + this.getFirstName() + " LastName: " + this.getLastName() + " specialties=" + specialties.toString() + "}";
         return s;
     }
-
-
-//    private Set<Specialty> specialties;
-//
-//    protected Set<Specialty> getSpecialtiesInternal() {
-//        if (this.specialties == null) {
-//            this.specialties = new HashSet<>();
-//        }
-//        return this.specialties;
-//    }
-
-//    protected void setSpecialtiesInternal(Set<Specialty> specialties) {
-//        this.specialties = specialties;
-//    }
-//
-//    @XmlElement
-//    public List<Specialty> getSpecialties() {
-//        List<Specialty> sortedSpecs = new ArrayList<>(getSpecialtiesInternal());
-//        PropertyComparator.sort(sortedSpecs,
-//            new MutableSortDefinition("name", true, true));
-//        return Collections.unmodifiableList(sortedSpecs);
-//    }
-//
-//    public int getNrOfSpecialties() {
-//        return getSpecialtiesInternal().size();
-//    }
-//
-//    public void addSpecialty(Specialty specialty) {
-//        getSpecialtiesInternal().add(specialty);
-//    }
 
 }

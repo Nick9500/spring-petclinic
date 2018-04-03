@@ -17,6 +17,8 @@ package org.springframework.samples.petclinic.vet;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.ShadowReads;
+import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
+import org.springframework.samples.petclinic.dataMigration.mvet.MVets;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,35 +36,32 @@ import java.util.Map;
 @Controller
 class VetController {
 
-    private final VetRepository vets;
-    private final ShadowReads sr;
+    private final VetMRepository vets;
 
     @Autowired
-    public VetController(VetRepository clinicService, ShadowReads sr) {
+    public VetController(VetMRepository clinicService) {
         this.vets = clinicService;
-        this.sr = sr;
     }
 
     @GetMapping("/vets.html")
     public String showVetList(Map<String, Object> model) {
         // Here we are returning an object of type 'Vets' rather than a collection of Vet
         // objects so it is simpler for Object-Xml mapping
-        Vets vets = new Vets();
-        Collection<Vet> allVets = this.vets.findAll();
-        this.sr.findAllVets(allVets);
+        MVets vets = new MVets();
+        Collection<MVet> allVets = this.vets.findAll();
         vets.getVetList().addAll(allVets);
         model.put("vets", vets);
         return "vets/vetList";
     }
 
     @GetMapping({ "/vets.json", "/vets.xml" })
-    public @ResponseBody Vets showResourcesVetList() {
+    public @ResponseBody MVets showResourcesVetList() {
         // Here we are returning an object of type 'Vets' rather than a collection of Vet
         // objects so it is simpler for JSon/Object mapping
-        Vets vets = new Vets();
-        Collection<Vet> allVets = this.vets.findAll();
-        this.sr.findAllVets(allVets);
+        MVets vets = new MVets();
+        Collection<MVet> allVets = this.vets.findAll();
         vets.getVetList().addAll(allVets);
+        System.out.println(vets.toString());
         return vets;
     }
 
