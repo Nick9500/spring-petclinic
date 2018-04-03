@@ -105,7 +105,7 @@ public class ConsistencyChecker {
 
 
     private int checkVet(){
-        migrationServices.printBanner("Checkign for inconsistencies in 'vets'");
+        migrationServices.printBanner("Checking for inconsistencies in 'vets'");
 
         int inconsistencies = 0;
         Collection<Vet> vetData = vetRepository.findAll();
@@ -221,13 +221,65 @@ public class ConsistencyChecker {
     }
 
     public boolean shadowWriteConsistencyCheck(Visit visit){
-        Pet actual = petRepository.findById(visit.getId());
-        MPet expected = petMRepository.findById(visit.getId().toString()).get();
+        Visit actual = visitRepository.findById(visit.getId());
+        MVisit expected = visitMRepository.findById(visit.getId().toString()).get();
 
         return compareActualAndExpected(actual, expected);
     }
 
-    public int shadowReadConsistencyCheck(Collection<Pet> petData, Collection<MPet> mPetData){
+    public int shadowReadConsistencyCheck(Visit original,  MVisit migrated){
+        migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
+        int inconsistencies = 0;
+
+        if (!compareActualAndExpected(original, migrated)){
+            inconsistencies++;
+            System.out.println("Inconsistency found, insert again");
+            visitMRepository.deleteById(migrated.getId());
+            visitMRepository.save(migrationServices.convertVisitToMvisit(original));
+        }
+
+        migrationServices.printBanner("No. inconsistencies found in visits: " + inconsistencies);
+        return inconsistencies;
+    }
+
+
+    public int shadowReadConsistencyCheck(Collection<Vet> vetData, Collection<MVet> mVetData){
+        migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
+
+        int inconsistencies = 0;
+        ArrayList<Vet> vets = new ArrayList<>(vetData);
+        ArrayList<MVet> mVets = new ArrayList<>(mVetData);
+
+        for(int i=0; i<vets.size(); i++){
+            Vet original = vets.get(i);
+            MVet migrated = mVets.get(i);
+            if(!compareActualAndExpected(original, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                vetMRepository.deleteById(migrated.getId());
+                vetMRepository.save(migrationServices.convertVetToMVet(original));
+            }
+        }
+
+        migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
+        return inconsistencies;
+    }
+
+    public int shadowReadConsistencyCheck(Pet original, MPet migrated) {
+    	migrationServices.printBanner("Shadow Read consistency checking for pet's findById()");
+    	int inconsistencies = 0;
+
+    	if(!compareActualAndExpected(original, migrated)) {
+    		inconsistencies++;
+            System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+            petMRepository.deleteById(migrated.getId());
+            petMRepository.save(migrationServices.convertPetToMPet(original));
+    	}
+        migrationServices.printBanner("No. inconsistencies found in pets: " + inconsistencies);
+    	return inconsistencies;
+    }
+
+    public int shadowReadConsistencyCheckPet(Collection<Pet> petData, Collection<MPet> mPetData){
         migrationServices.printBanner("Shadow Read consistency checking for pet's findPetTypes()");
 
         int inconsistencies = 0;
@@ -243,6 +295,7 @@ public class ConsistencyChecker {
 
             PetType originalType = petTypes.get(i);
             PetType migratedType = mPetTypes.get(i);
+
             if(!originalType.equals(migratedType)){
                 inconsistencies++;
                 System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
@@ -254,6 +307,19 @@ public class ConsistencyChecker {
         return inconsistencies;
     }
 
+    public int shadowReadConsistencyCheck(Owner original, MOwner migrated) {
+        migrationServices.printBanner("Shadow Read consistency checking for owner's findById()");
+        int inconsistencies = 0;
 
+        if(!compareActualAndExpected(original, migrated)) {
+            inconsistencies++;
+            System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+            ownerMRepository.deleteById(migrated.getId());
+            ownerMRepository.save(migrationServices.convertOwnerToMOwner(original));
+        }
+
+        migrationServices.printBanner("No. inconsistencies found in owners: " + inconsistencies);
+        return inconsistencies;
+    }
 
 }

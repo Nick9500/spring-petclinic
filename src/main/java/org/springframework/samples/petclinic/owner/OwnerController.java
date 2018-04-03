@@ -16,6 +16,7 @@
 package org.springframework.samples.petclinic.owner;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.samples.petclinic.dataMigration.ShadowReads;
 import org.springframework.samples.petclinic.dataMigration.ShadowWrites;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,11 +44,13 @@ class OwnerController {
     private static final String VIEWS_OWNER_CREATE_OR_UPDATE_FORM = "owners/createOrUpdateOwnerForm";
     private final OwnerRepository owners;
     private final ShadowWrites shadowWrites;
+    private final ShadowReads shadowReads;
 
     @Autowired
-    public OwnerController(OwnerRepository clinicService, ShadowWrites shadowWrites) {
+    public OwnerController(OwnerRepository clinicService, ShadowWrites shadowWrites, ShadowReads shadowReads) {
         this.owners = clinicService;
         this.shadowWrites = shadowWrites;
+        this.shadowReads = shadowReads;
     }
 
     @InitBinder
@@ -92,6 +95,7 @@ class OwnerController {
 
         // find owners by last name
         Collection<Owner> results = this.owners.findByLastName(owner.getLastName());
+        this.shadowReads.findOwnerByLastName(results, owner.getLastName());
         if (results.isEmpty()) {
             // no owners found
             result.rejectValue("lastName", "notFound", "not found");
@@ -110,6 +114,7 @@ class OwnerController {
     @GetMapping("/owners/{ownerId}/edit")
     public String initUpdateOwnerForm(@PathVariable("ownerId") int ownerId, Model model) {
         Owner owner = this.owners.findById(ownerId);
+        this.shadowReads.findOwnerById(owner, ownerId);
         model.addAttribute(owner);
         return VIEWS_OWNER_CREATE_OR_UPDATE_FORM;
     }
@@ -134,7 +139,9 @@ class OwnerController {
     @GetMapping("/owners/{ownerId}")
     public ModelAndView showOwner(@PathVariable("ownerId") int ownerId) {
         ModelAndView mav = new ModelAndView("owners/ownerDetails");
-        mav.addObject(this.owners.findById(ownerId));
+        Owner owner = this.owners.findById(ownerId);
+        mav.addObject(owner);
+        this.shadowReads.findOwnerById(owner, ownerId);
         return mav;
     }
 

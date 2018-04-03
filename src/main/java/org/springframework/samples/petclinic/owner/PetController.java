@@ -114,6 +114,7 @@ class PetController {
         } else {
             owner.addPet(pet);
             this.pets.save(pet);
+            this.shadowWrites.save(pet);
             return "redirect:/owners/{ownerId}";
         }
     }

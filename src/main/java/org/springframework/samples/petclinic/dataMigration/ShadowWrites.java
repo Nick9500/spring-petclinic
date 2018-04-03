@@ -7,7 +7,6 @@ import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.Pet;
-import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -20,14 +19,10 @@ public class ShadowWrites {
     private OwnerMRepository ownerMRepository;
 
     @Autowired
-    private PetRepository petRepository;
-
-    @Autowired
     private PetMRepository petMRepository;
 
     @Autowired
     private VisitMRepository visitMRepository;
-
 
     @Autowired
     private MigrationServices migrationServices;

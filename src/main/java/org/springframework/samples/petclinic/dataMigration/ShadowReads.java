@@ -7,38 +7,32 @@ import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMReposito
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
-import org.springframework.samples.petclinic.owner.*;
+import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.vet.Vet;
-import org.springframework.samples.petclinic.vet.VetRepository;
-import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 public class ShadowReads {
 
-    @Autowired
-    private OwnerRepository ownerRepository;
     @Autowired
     private OwnerMRepository ownerMRepository;
 
     @Autowired
-    private VetRepository vetRepository;
-    @Autowired
     private VetMRepository vetMRepository;
 
     @Autowired
-    private PetRepository petRepository;
-    @Autowired
     private PetMRepository petMRepository;
 
-    @Autowired
-    private VisitRepository visitRepository;
     @Autowired
     private VisitMRepository visitMRepository;
 
@@ -49,12 +43,60 @@ public class ShadowReads {
     private ConsistencyChecker consistencyChecker;
 
     @Async("ShadowReadThread")
-    public void findPetTypes(Collection<Pet> original){
-        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+ " for pet types");
-        Collection<MPet> migrated = petMRepository.findAll();
+    public void findAllVets(Collection<Vet> original){
+        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName() + "for all vets");
+        Collection<MVet> migrated = vetMRepository.findAll();
         consistencyChecker.shadowReadConsistencyCheck(original, migrated);
     }
 
+    @Async("ShadowReadThread")
+    public void findPetByID(Pet originalPet, String petId) {
+    	migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Pet By ID: "+petId);
+    	MPet migratedPet = petMRepository.findById(petId).get();
+    	consistencyChecker.shadowReadConsistencyCheck(originalPet, migratedPet);
+    }
 
+    @Async("ShadowReadThread")
+    public void findPetTypes(Collection<Pet> original){
+        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+ " for pet types");
+        Collection<MPet> migrated = petMRepository.findAll();
+        consistencyChecker.shadowReadConsistencyCheckPet(original, migrated);
+    }
 
+    @Async("ShadowReadThread")
+    public void findOwnerById(Owner actual, int id){
+        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Owner By ID: "+id);
+        MOwner migrated = ownerMRepository.findById(id+"").get();
+        consistencyChecker.shadowReadConsistencyCheck(actual, migrated);
+    }
+
+    @Async("ShadowReadThread")
+    public void findOwnerByLastName(Collection<Owner> actualResults, String lastName){
+        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Owner By Last Name: "+lastName);
+        Map<Integer, Owner> actual = actualResults.stream().collect(Collectors.toMap(owner -> owner.getId(), owner -> owner));
+        List<MOwner> expectedResults = ownerMRepository.findByLastName(lastName);
+
+        for(MOwner mowner : expectedResults){
+            try{
+                Owner owner = actual.get(Integer.parseInt(mowner.getId()));
+                if(!consistencyChecker.compareActualAndExpected(owner, mowner)){
+                    //inconsistent
+                    System.out.printf("Inconsistent read from Mongo... fixing inconsistency");
+                    ownerMRepository.deleteById(mowner.getId());
+                    ownerMRepository.save(migrationServices.convertOwnerToMOwner(owner));
+                }
+            }catch(NullPointerException e){
+                // extra data in the new db
+                System.out.println("Inconsistency found: extra data in Mongodb... Now deleting the extra data");
+                ownerMRepository.deleteById(mowner.getId());
+            }
+        }
+    }
+
+    @Async("ShadowReadThread")
+    public void findVisitByID( Visit originalVisit, String visitID ){
+        migrationServices.printBanner("Shadow reading on thread: "+Thread.currentThread().getName()+" for Visit by ID: "+visitID);
+        MVisit migratedVisit = visitMRepository.findById(visitID).get();
+        consistencyChecker.shadowReadConsistencyCheck(originalVisit, migratedVisit);
+    }
 }
