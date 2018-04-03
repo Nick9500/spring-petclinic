@@ -4,15 +4,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
 import org.springframework.samples.petclinic.owner.PetRepository;
+import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
 import org.springframework.samples.petclinic.visit.VisitRepository;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
 import java.util.Collection;
 
+@Component
 public class ShadowReads {
 
     @Autowired
@@ -58,8 +64,17 @@ public class ShadowReads {
 
     }
 
-    public void VetFindAll(){
 
+    public Collection<Vet> vetFindAll(){
+        Collection<Vet> original = vetRepository.findAll();
+        vetFindAllShadow(original);
+        return original;
+    }
+
+    @Async("ShadowReadThread")
+    public void vetFindAllShadow(Collection<Vet> original){
+        Collection<MVet> migrated = vetMRepository.findAll();
+        consistencyChecker.shadowReadConsistencyCheck(original, migrated);
     }
 
     public void PetFindAll(){

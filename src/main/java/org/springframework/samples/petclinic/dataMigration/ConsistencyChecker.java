@@ -107,7 +107,7 @@ public class ConsistencyChecker {
 
 
     private int checkVet(){
-        migrationServices.printBanner("Checkign for inconsistencies in 'vets'");
+        migrationServices.printBanner("Checking for inconsistencies in 'vets'");
 
         int inconsistencies = 0;
         Collection<Vet> vetData = vetRepository.findAll();
@@ -229,6 +229,26 @@ public class ConsistencyChecker {
         return compareActualAndExpected(actual, expected);
     }
 
+    public Collection<Vet> shadowReadConsistencyCheck(Collection<Vet> vetData, Collection<MVet> mVetData){
+        migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
 
+        int inconsistencies = 0;
+        ArrayList<Vet> vets = new ArrayList<>(vetData);
+        ArrayList<MVet> mVets = new ArrayList<>(mVetData);
+
+        for(int i=0; i<vets.size(); i++){
+            Vet original = vets.get(i);
+            MVet migrated = mVets.get(i);
+            if(!compareActualAndExpected(original, migrated)){
+                inconsistencies++;
+                System.out.println("INCONSISTENCY FOUND, INSERTING AGAIN");
+                vetMRepository.deleteById(migrated.getId());
+                vetMRepository.save(migrationServices.convertVetToMVet(original));
+            }
+        }
+
+        migrationServices.printBanner("No. inconsistencies found in vets: " + inconsistencies);
+        return vetData;
+    }
 
 }
