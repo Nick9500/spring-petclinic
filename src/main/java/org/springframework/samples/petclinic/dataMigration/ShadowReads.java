@@ -7,6 +7,7 @@ import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -35,8 +36,9 @@ public class ShadowReads {
     @Autowired
     private ConsistencyChecker consistencyChecker;
 
+    @Async("ShadowReadThread")
     public void findOwnerByLastName(Collection<Owner> actualResults, String lastName){
-        migrationServices.printBanner("Shadowing reading for Owner By Last Name: "+lastName);
+        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Owner By Last Name: "+lastName);
         Map<Integer, Owner> actual = actualResults.stream().collect(Collectors.toMap(owner -> owner.getId(), owner -> owner));
         List<MOwner> expectedResults = ownerMRepository.findByLastName(lastName);
 

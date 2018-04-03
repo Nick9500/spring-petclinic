@@ -21,4 +21,9 @@ public class SpringAsyncConfig {
     public Executor ShadowWriteThread() {
         return new ThreadPoolTaskExecutor();
     }
+
+    @Bean(name = "ShadowReadThread")
+    public Executor ShadowReadThread() {
+        return new ThreadPoolTaskExecutor();
+    }
 }
