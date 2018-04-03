@@ -7,6 +7,7 @@ import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMReposito
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
 import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
+import org.springframework.samples.petclinic.dataMigration.mvisit.MVisit;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
@@ -14,10 +15,12 @@ import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
+import org.springframework.samples.petclinic.visit.Visit;
 import org.springframework.samples.petclinic.visit.VisitRepository;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -86,5 +89,12 @@ public class ShadowReads {
                 ownerMRepository.deleteById(mowner.getId());
             }
         }
+    }
+
+    @Async("ShadowReadThread")
+    public void findVisitByID( Visit originalVisit, String visitID ){
+        migrationServices.printBanner("Shadow reading on thread: "+Thread.currentThread().getName()+" for Visit by ID: "+visitID);
+        MVisit migratedVisit = visitMRepository.findById(visitID).get();
+        consistencyChecker.shadowReadConsistencyCheck(originalVisit, migratedVisit);
     }
 }

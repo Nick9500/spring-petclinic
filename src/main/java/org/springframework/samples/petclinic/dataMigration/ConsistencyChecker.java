@@ -229,6 +229,22 @@ public class ConsistencyChecker {
         return compareActualAndExpected(actual, expected);
     }
 
+    public int shadowReadConsistencyCheck(Visit original,  MVisit migrated){
+        migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
+        int inconsistencies = 0;
+
+        if (!compareActualAndExpected(original, migrated)){
+            inconsistencies++;
+            System.out.println("Inconsistency found, insert again");
+            visitMRepository.deleteById(migrated.getId());
+            visitMRepository.save(migrationServices.convertVisitToMvisit(original));
+        }
+
+        migrationServices.printBanner("No. inconsistencies found in visits: " + inconsistencies);
+        return inconsistencies;
+    }
+
+
     public int shadowReadConsistencyCheck(Collection<Vet> vetData, Collection<MVet> mVetData){
         migrationServices.printBanner("Shadow Read consistency checking for vet's findAll()");
 
