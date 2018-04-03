@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.dataMigration;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.samples.petclinic.dataMigration.mowner.MOwner;
+import org.springframework.samples.petclinic.dataMigration.mowner.MPet;
 import org.springframework.samples.petclinic.dataMigration.mowner.OwnerMRepository;
 import org.springframework.samples.petclinic.dataMigration.mowner.PetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvet.MVet;
@@ -9,6 +10,7 @@ import org.springframework.samples.petclinic.dataMigration.mvet.VetMRepository;
 import org.springframework.samples.petclinic.dataMigration.mvisit.VisitMRepository;
 import org.springframework.samples.petclinic.owner.Owner;
 import org.springframework.samples.petclinic.owner.OwnerRepository;
+import org.springframework.samples.petclinic.owner.Pet;
 import org.springframework.samples.petclinic.owner.PetRepository;
 import org.springframework.samples.petclinic.vet.Vet;
 import org.springframework.samples.petclinic.vet.VetRepository;
@@ -48,8 +50,11 @@ public class ShadowReads {
         consistencyChecker.shadowReadConsistencyCheck(original, migrated);
     }
 
-    public void PetFindAll(){
-
+    @Async("ShadowReadThread")
+    public void findPetByID(Pet originalPet, String petId) {
+    	migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Pet By ID: "+petId);
+    	MPet migratedPet = petMRepository.findById(petId).get();
+    	consistencyChecker.shadowReadConsistencyCheck(originalPet, migratedPet);
     }
 
     @Async("ShadowReadThread")
