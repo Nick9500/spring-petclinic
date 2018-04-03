@@ -57,13 +57,6 @@ public class ShadowReads {
     }
 
     @Async("ShadowReadThread")
-    public void findPetTypes(Collection<Pet> original){
-        migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+ " for pet types");
-        Collection<MPet> migrated = petMRepository.findAll();
-        consistencyChecker.shadowReadConsistencyCheckPet(original, migrated);
-    }
-
-    @Async("ShadowReadThread")
     public void findOwnerById(Owner actual, int id){
         migrationServices.printBanner("Shadowing reading on thread: "+Thread.currentThread().getName()+" for Owner By ID: "+id);
         MOwner migrated = ownerMRepository.findById(id+"").get();
